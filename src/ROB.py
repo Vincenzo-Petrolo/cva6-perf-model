@@ -56,6 +56,7 @@ class ROB():
         return self.count == self.size
 
     def push(self, entry: ROBEntry) -> bool:
+        """This is done by the issue unit, it pushes the instruction to the ROB."""
         if self.is_full():
             return False
         self.entries[self.tail] = entry
@@ -88,7 +89,7 @@ class ROB():
         self.entries = [ROBEntry() for _ in range(self.size)]
     
     def updateResult(self, rd_idx: int, res_value: int) -> None:
-        """Update the result of the instruction in the ROB."""
+        """Update the result of the instruction in the ROB, this comes from the CDB."""
         for entry in self.entries:
             if entry.rd_idx == rd_idx:
                 entry.res_ready = True

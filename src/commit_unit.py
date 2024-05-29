@@ -68,11 +68,11 @@ class CommitUnit( object ):
             # at this time, must wait the next cycle
             return
         
-        # # Step 6
-        # cdb_entry = self.cdb.get()
+        # # Step 6 TODO
+        cdb_entry = self.cdb.get()
 
-        # if cdb_entry.valid:
-        #     self.rob.push(cdb_entry)
+        if cdb_entry:
+            self.rob.upda(cdb_entry)
 
         # End
 
