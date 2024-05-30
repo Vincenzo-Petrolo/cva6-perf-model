@@ -1,4 +1,6 @@
 from abc import ABC, abstractmethod
+import instr
+import isa
 
 class ReservationStationEntry(object):
     """Resembles the Reservation Station Entry of a generic Unit of LEN5 processor."""
@@ -65,6 +67,9 @@ class arithReservationStationEntry(ReservationStationEntry):
         self.rs2_idx    = None
         self.rs2_value  = None
         self.op         = None
+        self.func7      = None
+        self.func3      = None
+        self.imm        = None
 
 
     def __str__(self):
@@ -73,10 +78,29 @@ class arithReservationStationEntry(ReservationStationEntry):
     def __repr__(self):
         return self.__str__()
 
-    def convertToEntry(instr):
-        """Implement me and return an entry object of type arithReservationStationEntry."""
-        #TODO I still don't know how instructions will be issued
-        pass
+    def convertToEntry(pc, instr : instr.Instruction):
+        """Instruction can be of R-type or I-type."""
+        # Create the entry object
+        entry = arithReservationStationEntry()
+        entry.setInstr(instr)
+        entry.setPC(pc)
+        # Set common operands in R/I instr
+        entry.rd_idx = instr.rd
+        entry.rs1_idx = instr.rs1
+        entry.func3 = instr.func3
+        entry.op = instr.opcode
+
+
+        # If instruction is of R-type
+        if (instr.getType() is isa.Rtype):
+            entry.rs2_idx = instr.rs2
+            entry.func7 = instr.func7
+        elif (instr.getType() is isa.Itype):
+            entry.imm = instr.imm
+
+
+        return entry
+
 
     def reset(self):
         self.pc         = None

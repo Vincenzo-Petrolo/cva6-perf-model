@@ -486,6 +486,9 @@ class Instr:
             col = (self.bin >> 2) & 7
             result = Instr.table_24_1[line][col]
         return result
+    
+    def getType(self):
+        return Instr.type_of_base[self.base()]
 
     def fields(self):
         """Get an object with the fields of the instruction"""
