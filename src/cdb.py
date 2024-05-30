@@ -1,3 +1,4 @@
+from queue import Queue
 
 class CommonDataBus(object):
     """Resembles the Common Data Bus of LEN5 processor.
@@ -14,7 +15,7 @@ class CommonDataBus(object):
         # This is used as a container to store the current value
         # that the CDB is holding, this is used for the ROB to be
         # able to read the value from the CDB.
-        self.currentOutput = {"rd_idx": None, "res_value": None, "valid" : False}
+        self.buffer_o = Queue(1)
 
         pass
 
@@ -29,22 +30,26 @@ class CommonDataBus(object):
         """Get the current value from the CDB.
         This is used by the ROB to read the value from the CDB.
         """
-        return self.currentOutput
+        if (self.buffer_o.empty()):
+            return None
+
+        return self.buffer_o.get()
 
 
     def step(self):
         """Steps to perform in a cycle:
-        1. Iterate over the execution units.
-        2. Check if the execution unit has a result ready.
-        3. If the result is ready, update the current output.
+        1. Check if CDB is empty
+        2. Iterate over the execution units.
+        3. Check if the execution unit has a result ready.
+        4. If the result is ready, update the current output.
         """
-
-        # Prepare the current output to be invalid
-        self.currentOutput = {"rd_idx": None, "res_value": None, "valid" : False}
-
         # Step 1
+        if (not self.buffer_o.empty()):
+            return
+
+        # Step 2
         for eu in self.EUS:
-            # Step 2
+            # Step 3
             if eu.hasResult():
-                # Step 3
+                # Step 4
                 self.currentOutput = eu.getResult()
