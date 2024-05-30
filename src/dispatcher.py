@@ -109,7 +109,7 @@ class Dispatcher(object):
 
                 for eu in eus:
                     # Issue the instruction
-                    could_issue = eu.issue(instr_obj)
+                    could_issue = eu.issue(arithReservationStationEntry.convertToEntry(instr_obj))
 
                     if (could_issue == True):
                         # The instruction was able to issue
