@@ -159,9 +159,13 @@ class Dispatcher(object):
         """Get n instructions that can be allocated in ROB."""
         instrs = []
 
-        while not self.iq.empty() and len(instrs) < n:
-            instr = self.buffer_o.dequeue()
+        i = 0
+
+        while not self.iq.empty() and i < n:
+            instr = self.buffer_o[i]
             instrs.append(instr)
+
+            i += 1
         
         return instrs
     
