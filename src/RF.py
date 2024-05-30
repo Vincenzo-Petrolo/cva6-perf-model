@@ -1,8 +1,6 @@
-from pymtl3 import *
-
-class RF( Component ):
+class RF( object ):
     """Resembles the register file of LEN5 processor."""
-    def construct(s, *args, **kwargs):
+    def __init__(s, *args, **kwargs):
         # 32 registers
         s.regs = [0]*32
 
