@@ -1,5 +1,6 @@
 from queue import Queue
 from arith_unit import arithReservationStationEntry, ArithUnit
+from exec_unit import ExecUnit
 import isa
 
 
@@ -38,9 +39,6 @@ class Dispatcher(object):
         # Number of issued instructions per cycle
         self.n_issue = n_issue
 
-        # Empty list of execution units
-        self.EUS = []
-
         # Dispatch buffer
         self.buffer_o = [Queue(1) for _ in range(n_issue)]
 
@@ -48,9 +46,8 @@ class Dispatcher(object):
         self.iq = None
 
     def register(self, eu):
-        """Register the execution unit to the Dispatcher.
-        """
-        self.EUS.append(eu)
+        """Register the execution unit to the Dispatcher."""
+        Dispatcher.EUS_mapping[eu.__class__].append(eu)
     
     def connectIQ(self, iq):
         """Connect the instruction queue to the dispatcher.
