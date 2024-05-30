@@ -1,6 +1,6 @@
 # Import your backend
 from commit_unit import CommitUnit
-from RF import RF
+from rf import RF
 
 def simulate_backend(steps):
     # Instantiate the backend
