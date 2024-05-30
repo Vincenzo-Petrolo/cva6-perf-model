@@ -55,14 +55,20 @@ class ROB():
     def is_full(self) -> bool:
         return self.count == self.size
 
-    def push(self, entry: ROBEntry) -> bool:
+    def push(self, entry: ROBEntry) -> int:
         """This is done by the issue unit, it pushes the instruction to the ROB."""
         if self.is_full():
-            return False
+            return -1
+
         self.entries[self.tail] = entry
+
+        rob_idx = self.tail
+
         self.tail = (self.tail + 1) % self.size
         self.count += 1
-        return True
+
+        # Return the index of the entry
+        return rob_idx
 
     def pop(self) -> ROBEntry:
         if self.is_empty():
