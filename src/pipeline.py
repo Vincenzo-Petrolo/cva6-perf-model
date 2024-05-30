@@ -1,10 +1,8 @@
-from collections import deque
-
 class Pipeline:
     def __init__(self, num_stages: int, iterative : bool = False):
         self.num_stages = num_stages
 
-        self.stages = deque([None] * num_stages, maxlen=num_stages)
+        self.stages = [None for _ in range(num_stages)] 
 
         self.iterative = iterative
 
@@ -16,7 +14,7 @@ class Pipeline:
         if (self.iterative and self._hasInFlightInstruction()):
             return False
         
-        self.stages.appendleft(instruction)
+        self.stages[0] = instruction
 
         return True
     
@@ -28,13 +26,20 @@ class Pipeline:
         return False
 
     def advance(self):
+        #? This is not very efficient, but it is simple
         # Move instructions through the pipeline
-        # The instruction at the end is automatically discarded if it's None
-        self.stages.appendleft(None)
+        for i in range(self.num_stages-1, 0, -1):
+            # Do not overwrite the i-th instruction
+            # because if it is not None, it means it could not be
+            # moved to the next stage
+            if (self.stages[i] is None):
+                self.stages[i] = self.stages[i-1]
 
     def popLastInstruction(self):
         # Remove the instruction at the end of the pipeline
-        return self.stages.pop()
+        last_instruction = self.stages[-1]
+        self.stages[-1] = None
+        return last_instruction
 
     def getLastInstruction(self):
         # Get the instruction at the end of the pipeline
@@ -44,7 +49,7 @@ class Pipeline:
         if (self.iterative):
             return self._hasInFlightInstruction()
         
-        # If first entry is None, we can get a new instruction
+        # If first entry is None, I can get a new instruction
         return self.stages[0] is None
 
     def __repr__(self):
