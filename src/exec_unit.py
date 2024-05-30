@@ -64,6 +64,13 @@ class ExecUnit(ABC):
     def getResult(self):
         return self.buffer_o.get()
     
+    def issue(self, instr) -> bool:
+        """Issue an instruction to the execution unit.
+        If the instruction is issued, it is converted to an entry
+        and stored in the reservation station.
+        """
+        return self.rs.issue(instr)
+    
     def setIdle(self):
         self.status = 'idle'
         self.ready = False

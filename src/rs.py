@@ -57,7 +57,7 @@ class ReservationStationEntry(object):
 
 class arithReservationStationEntry(ReservationStationEntry):
     """Resembles the Reservation Station Entry of a generic Arithmetic Unit of LEN5 processor."""
-    def __init__(self, ) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self.rd_idx     = None
         self.rs1_idx    = None
@@ -73,7 +73,24 @@ class arithReservationStationEntry(ReservationStationEntry):
     def __repr__(self):
         return self.__str__()
 
-    # TODO implement the abstract methods of parent class
+    def convertToEntry(instr):
+        """Implement me and return an entry object of type arithReservationStationEntry."""
+        #TODO I still don't know how instructions will be issued
+        pass
+
+    def reset(self):
+        self.pc         = None
+        self.instr      = None
+        self.res_value  = None
+        self.rd_idx     = None
+        self.rs1_idx    = None
+        self.rs1_value  = None
+        self.rs2_idx    = None
+        self.rs2_value  = None
+        self.op         = None
+    
+    def isReady(self):
+        return self.rs1_value is not None and self.rs2_value is not None
 
 
 
