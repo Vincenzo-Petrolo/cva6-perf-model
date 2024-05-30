@@ -4,6 +4,13 @@ from rs import ReservationStation, ReservationStationEntry
 from pipeline import Pipeline
 
 class ExecUnit(ABC):
+    """
+    Execution Unit class, can be used to create different types of execution units
+    performing arithmetic operations.
+    Maybe it can be used also as a branch unit, but definitely not as LSU.
+
+    Remember to implement the execute method!
+    """
     def __init__(self, n_entries : int , reservation_station_t : type[ReservationStationEntry], latency : int = 1, iterative : bool = True ) -> None:
         super().__init__()
 

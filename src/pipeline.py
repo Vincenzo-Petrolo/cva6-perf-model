@@ -27,6 +27,7 @@ class Pipeline:
 
     def advance(self):
         #? This is not very efficient, but it is simple
+        # todo: test with n_stages = 1
         # Move instructions through the pipeline
         for i in range(self.num_stages-1, 0, -1):
             # Do not overwrite the i-th instruction
