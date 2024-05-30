@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-import instr
+from instr import Instruction
 import isa
 
 class ReservationStationEntry(object):
@@ -41,8 +41,17 @@ class ReservationStationEntry(object):
         return self.rob_idx
     
     @abstractmethod
-    def convertToEntry(instr):
+    def convertToEntry(instr : dict):
         """Implement me and return an entry of the type of the Reservation Station Entry."""
+        """Instruction is received as a dictionary with the following keys
+        {
+            "line"      : str,
+            "address"   : int,
+            "hex_code"  : str,
+            "mnemo"     : str,
+            "rob_idx"   : int
+        }
+        """
         pass
 
     @abstractmethod

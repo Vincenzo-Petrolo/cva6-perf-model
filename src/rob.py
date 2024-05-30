@@ -1,3 +1,4 @@
+from instr import Instruction
 
 #   typedef struct packed {
 #     instr_t instruction;  // the instruction
@@ -33,6 +34,16 @@ class ROBEntry():
 
     def __repr__(self):
         return self.__str__()
+    
+    def convertInstructionToROBEntry(instr: Instruction):
+        entry = ROBEntry()
+
+        entry.instruction = instr
+        entry.instr_pc = instr.address
+        entry.rd_idx = instr.fields().rd
+        entry.valid = True
+
+        return entry
 
 class ROB():
     """Reorder Buffer data structure."""
@@ -44,7 +55,9 @@ class ROB():
         self.count = 0
 
     def __str__(self):
-        return f"ROB(size={self.size}, head={self.head}, tail={self.tail}, count={self.count}, entries={self.entries})"
+        """Dump each entry of the ROB."""
+        return "\n".join([f"ROB[{i}]={entry}" for i, entry in enumerate(self.entries)])
+
 
     def __repr__(self):
         return self.__str__()
@@ -55,12 +68,12 @@ class ROB():
     def is_full(self) -> bool:
         return self.count == self.size
 
-    def push(self, entry: ROBEntry) -> int:
+    def push(self, instr: Instruction) -> int:
         """This is done by the issue unit, it pushes the instruction to the ROB."""
         if self.is_full():
             return -1
 
-        self.entries[self.tail] = entry
+        self.entries[self.tail] = ROBEntry.convertInstructionToROBEntry(instr)
 
         rob_idx = self.tail
 

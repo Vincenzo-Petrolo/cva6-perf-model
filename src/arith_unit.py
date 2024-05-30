@@ -25,23 +25,23 @@ class arithReservationStationEntry(ReservationStationEntry):
     def __repr__(self):
         return self.__str__()
 
-    def convertToEntry(pc, instr : instr.Instruction):
+    def convertToEntry(instr : instr.Instruction):
         """Instruction can be of R-type or I-type."""
         # Create the entry object
         entry = arithReservationStationEntry()
-        entry.setInstr(instr)
-        entry.setPC(pc)
+        entry.setInstr(instr.mnemo)
+        entry.setPC(instr.address)
         # Set common operands in R/I instr
-        entry.rd_idx = instr.rd
-        entry.rs1_idx = instr.rs1
-        entry.func3 = instr.func3
-        entry.op = instr.opcode
+        entry.rd_idx = instr.fields().rd
+        entry.rs1_idx = instr.fields().rs1
+        entry.func3 = instr.fields().funct3
+        entry.op = instr.fields().opcode
 
 
         # If instruction is of R-type
         if (instr.getType() is isa.Rtype):
-            entry.rs2_idx = instr.rs2
-            entry.func7 = instr.func7
+            entry.rs2_idx = instr.fields().rs2
+            entry.func7 = instr.fields().funct7
         elif (instr.getType() is isa.Itype):
             entry.imm = instr.imm
 
@@ -68,8 +68,8 @@ class ArithUnit(ExecUnit):
     Arithmetic Unit class, can be used to create different types of execution units
     performing arithmetic operations.
     """
-    def __init__(self, n_entries : int , reservation_station_t : type[arithReservationStationEntry], latency : int = 1, iterative : bool = True ) -> None:
-        super().__init__(n_entries, reservation_station_t, latency, iterative)
+    def __init__(self, n_entries : int, latency : int = 1, iterative : bool = True ) -> None:
+        super().__init__(n_entries, arithReservationStationEntry, latency, iterative)
 
     def execute(self, entry : ReservationStationEntry):
         """Implement the execution of the instruction.

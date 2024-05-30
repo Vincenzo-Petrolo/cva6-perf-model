@@ -1,8 +1,7 @@
-from queue import Queue
 from arith_unit import ArithUnit
 from exec_unit import ExecUnit
-from rs import ReservationStationEntry
 from customQueue import CustomQueue
+from instr import Instruction
 import isa
 
 
@@ -73,16 +72,6 @@ class Dispatcher(object):
         if self.iq is None:
             raise Exception("Instruction Queue is not connected to the dispatcher.")
         
-    def convertInstr(line, address, hex_code, mnemo):
-        """
-        Get a raw HEX instruction and convert it to an Instruction object so that
-        we can get its type.
-        """
-        c_instr = isa.Instruction(line, address, hex_code, mnemo)
-
-        return c_instr
-
-
 
     def step(self):
         """Steps to perform in a cycle:
@@ -100,58 +89,38 @@ class Dispatcher(object):
 
 
         # Step 2
-        for i, instr_ in enumerate(self.buffer_o):
+        for i, instr in enumerate(self.buffer_o):
             # Check if the instruction was not allocated in the ROB
-            if instr_["rob_idx"] is None:
+            if instr.rob_idx is None:
                 # Continue to the next entry
                 continue
 
-            instr_obj = Dispatcher.convertInstr(
-                instr_["line"],
-                instr_["address"],
-                instr_["hex_code"],
-                instr_["mnemo"]
-            )
-
             # See which execution unit can handle this instruction
-            eus = Dispatcher.rules[instr_obj.getType()]
+            eus = Dispatcher.EUS_mapping[Dispatcher.rules[instr.getType()]]
 
             if (len(eus) == 0):
-                raise Exception(f"No execution unit can accept this instruction {instr_obj}")
+                raise Exception(f"No execution unit can accept this instruction {instr}")
             
             # Iterate over the execution units
             could_issue = False
 
             for eu in eus:
-                could_issue = self.issue(eu, instr_obj, instr_["rob_idx"])
+                could_issue = self.issue(eu, instr)
 
                 # If could issue, then free buffer entry
                 if could_issue:
                     self.buffer_o.pop_at(i)
     
-    def issue(self, eu : ExecUnit, instr : isa.Instruction, rob_idx : int):
+    def issue(self, eu : ExecUnit, instr : Instruction):
         """Issue an instruction to an execution unit"""
-        # First get the entry type for this execution unit
-        entry_t = eu.rs.entry_t
-
-        # Create an entry
-        entry = entry_t.convertToEntry(instr)
-
-        # Update the entry with basic info
-        entry.setPC(instr.pc)
-        entry.setROBIdx(rob_idx)
-        entry.setInstr(instr.mnemo)
-
         # Issue the entry to the execution unit
-        could_issue = eu.issue(entry)
+        could_issue = eu.issue(instr)
 
         return could_issue
 
     def enqueueInstruction(self):
         """Enqueue an instruction to the dispatcher."""
         instr = self.iq.get()
-
-        instr["rob_idx"] = None
 
         self.buffer_o.enqueue(instr)
         
@@ -161,11 +130,14 @@ class Dispatcher(object):
 
         i = 0
 
-        while not self.iq.empty() and i < n:
+        while i < len(self.buffer_o) and i < n:
             instr = self.buffer_o[i]
             instrs.append(instr)
 
             i += 1
         
+        
         return instrs
     
+    def empty(self):
+        return self.buffer_o.empty()

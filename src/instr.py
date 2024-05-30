@@ -3,13 +3,14 @@ from isa import Instr, Reg
 class Instruction(Instr):
     """Represents a RISC-V instruction with annotations"""
 
-    def __init__(self, line, address, hex_code, mnemo):
+    def __init__(self, line, address, hex_code, mnemo, rob_idx):
         Instr.__init__(self, int(hex_code, base=16))
         self.line = line
         self.address = int(address, base=16)
         self.hex_code = hex_code
         self.mnemo = mnemo
         self.events = []
+        self.rob_idx = rob_idx
 
     def mnemo_name(self):
         """The name of the instruction (fisrt word of the mnemo)"""

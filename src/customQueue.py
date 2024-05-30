@@ -37,3 +37,6 @@ class CustomQueue:
     
     def __str__(self):
         return str(self.queue)
+    
+    def __getitem__(self, index):
+        return self.queue[index]

@@ -1,5 +1,6 @@
 import re
 from queue import Queue
+from instr import Instruction
 
 class InstrQueue(object):
     """
@@ -27,19 +28,13 @@ class InstrQueue(object):
         with open(filename) as f:
             for i, line in enumerate(f):
                 """Get line, address, hex code, mnemo"""
-                address, hex_code, mnemonic = self._parseDisassemblyLine(line)
+                address, hex_code, mnemonic = InstrQueue._parseDisassemblyLine(line)
 
                 # Skip if what we got is not an instruction
                 if address is None:
                     continue
                 
-                instr = {
-                    "line" : i,
-                    "address" : address,
-                    "hex_code" : hex_code,
-                    "mnemo" : mnemonic
-                }
-
+                instr = Instruction(line, address, hex_code, mnemonic, None)
                 self.queue.put(instr)
             
 
@@ -59,4 +54,8 @@ class InstrQueue(object):
             return address, hex_code, mnemonic
         else:
             return None, None, None
+        
+    def empty(self) -> bool:
+        """Check if the queue is empty."""
+        return self.queue.empty()
 

@@ -1,4 +1,4 @@
-from rob import ROB
+from rob import ROB, ROBEntry
 
 # Import the queue data structure from the Python standard library
 from queue import Queue
@@ -87,7 +87,7 @@ class CommitUnit( object ):
         for instr in instrs:
             rob_idx = self.rob.push(instr)
             # Update the rob index of the issued instructions
-            instr["rob_idx"] = rob_idx
+            instr.rob_idx = rob_idx
 
 
         # End
@@ -132,3 +132,7 @@ class CommitUnit( object ):
         
         if self.dispatcher is None:
             raise ValueError("Dispatcher handle is not connected to the commit unit.")
+    
+    def empty(self) -> bool:
+        """Check if the commit unit is empty."""
+        return self.rob.is_empty() and self.commit_queue.empty()

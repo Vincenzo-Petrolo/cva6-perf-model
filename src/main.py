@@ -18,10 +18,9 @@ def main():
 
     while True:
         print(f"Step {i}")
-        try:
-            scheduler.step()
-        except Exception as e:
-            print(e)
-            break
+        scheduler.step()
 
         i += 1
+
+if __name__ == "__main__":
+    main()
