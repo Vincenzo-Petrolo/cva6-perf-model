@@ -7,7 +7,7 @@ from queue import Queue
 
 class CommitUnit( object ):
     """Resembles the commit unit of LEN5 processor"""
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         # Reorder Buffer
         self.rob = ROB(16)
         # A queue of size 3
