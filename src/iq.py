@@ -47,10 +47,10 @@ class InstrQueue(object):
         """
         Parse a line from the disassembly file and extract the address, hex code,
         """
-        pattern = re.compile(r'^\s*([0-9a-fA-F]+):\s+([0-9a-fA-F]+)\s+(.+)$')
+        pattern = re.compile(r'0x([0-9a-fA-F]+)\s+\(0x([0-9a-fA-F]+)\)\s+(.+)$')
         
         # Search the pattern in the given line
-        match = pattern.match(line)
+        match = pattern.search(line)
         if match:
             # Extract the address, hex code, and mnemonic
             address = match.group(1)
@@ -59,5 +59,4 @@ class InstrQueue(object):
             return address, hex_code, mnemonic
         else:
             return None, None, None
-    
 
