@@ -123,3 +123,7 @@ class ROB():
         if self.is_empty():
             return False
         return self.entries[self.head].res_ready
+    
+    def freeSlots(self) -> int:
+        """Return the number of free slots in the ROB."""
+        return self.size - self.count

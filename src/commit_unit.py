@@ -79,6 +79,16 @@ class CommitUnit( object ):
             return
         
         # Step 6, can pull instructions from the dispatcher
+        free_slots = self.rob.freeSlots()
+
+        # Get the instructions from the dispatcher
+        instrs = self.dispatcher.getIssuableInstructions(free_slots)
+
+        for instr in instrs:
+            rob_idx = self.rob.push(instr)
+            # Update the rob index of the issued instructions
+            instr["rob_idx"] = rob_idx
+
 
         # End
 
