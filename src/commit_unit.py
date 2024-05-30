@@ -19,6 +19,9 @@ class CommitUnit( object ):
         # CDB handle
         self.cdb = None
 
+        # Dispatcher handle
+        self.dispatcher = None
+
 
     def step(self):
         """Steps to perform in a cycle:
@@ -27,7 +30,7 @@ class CommitUnit( object ):
         3. Commit the instruction by writing to the RF.
         4. Pop from the ROB if the instruction is ready.
         5. Push the instruction to the commit queue.
-        6. Pull from the CDB and update the ROB.
+        6. Pull from the Dispatcher.
         All of this happens if everything has space, otherwise if one in the 
         pipeline is full, then the remaining steps will stall.
         """
@@ -63,16 +66,19 @@ class CommitUnit( object ):
             # Step 5, TODO could skip this if the instr is not valid
             self.commit_queue.put(entry)
         
+        # before doing the last step, check if the CDB has an entry
+        # if it does, then update the result in the ROB
+        cdb_entry = self.cdb.get()
+
+        if cdb_entry:
+            self.rob.updateResult(cdb_entry)
+
         if (full):
             # If the ROB was full, then only this operation is performed
             # at this time, must wait the next cycle
             return
         
-        # Step 6
-        cdb_entry = self.cdb.get()
-
-        if cdb_entry:
-            self.rob.updateResult(cdb_entry)
+        # Step 6, can pull instructions from the dispatcher
 
         # End
 
@@ -83,6 +89,10 @@ class CommitUnit( object ):
     def connectCDB(self, cdb):
         """Connect the CDB to the commit unit."""
         self.cdb = cdb
+    
+    def connectDispatcher(self, dispatcher):
+        """Connect the dispatcher to the commit unit."""
+        self.dispatcher = dispatcher
 
     def searchOperand(self, rs_idx: int) -> int:
         """Search for the operand in the commit stage for forwarding."""
@@ -109,3 +119,6 @@ class CommitUnit( object ):
         
         if self.cdb is None:
             raise ValueError("CDB handle is not connected to the commit unit.")
+        
+        if self.dispatcher is None:
+            raise ValueError("Dispatcher handle is not connected to the commit unit.")

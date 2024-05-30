@@ -1,6 +1,7 @@
 from queue import Queue
-from arith_unit import arithReservationStationEntry, ArithUnit
+from arith_unit import ArithUnit
 from exec_unit import ExecUnit
+from rs import ReservationStationEntry
 import isa
 
 
@@ -40,6 +41,18 @@ class Dispatcher(object):
         self.n_issue = n_issue
 
         # Dispatch buffer
+        """A typical buffer entry is a dictionary with the following keys
+        {
+            "line" : str,
+            "address" : int,
+            "hex_code" : str,
+            "mnemo" : str,
+            "rob_idx" : int | None
+        } 
+
+        In the beginning, the rob_idx is None, but when the ROB has space, the
+        instruction is allocated a space in the ROB and the rob_idx is updated.
+        """
         self.buffer_o = [Queue(1) for _ in range(n_issue)]
 
         # Instruction Queue
@@ -88,30 +101,54 @@ class Dispatcher(object):
                 # See if we can issue the instruction
                 instr_ = buffer.get()
 
+                # Check if the instruction was allocated in the ROB
+                if instr_["rob_idx"] is None:
+                    # Put instruction back to the buffer
+                    buffer.put(instr_)
+                    # Continue to the next buffer entry
+                    continue
+
                 instr_obj = Dispatcher.convertInstr(
-                    instr["line"],
-                    instr["address"],
-                    instr["hex_code"],
-                    instr["mnemo"]
+                    instr_["line"],
+                    instr_["address"],
+                    instr_["hex_code"],
+                    instr_["mnemo"]
                 )
 
                 # See which execution unit can handle this instruction
                 eus = Dispatcher.rules[instr_obj.getType()]
 
                 if (len(eus) == 0):
-                    raise Exception(f"No execution unit available for instruction {instr_obj}")
+                    raise Exception(f"No execution unit can accept this instruction {instr_obj}")
                 
                 # Iterate over the execution units
                 could_issue = False
 
                 for eu in eus:
-                    # Issue the instruction
-                    could_issue = eu.issue(arithReservationStationEntry.convertToEntry(instr_obj))
+                    could_issue = self.issue(eu, instr_obj, instr_["rob_idx"])
 
-                    if (could_issue == True):
-                        # The instruction was able to issue
-                        break
-                
                 if (could_issue == False):
                     # If couldn't issue the instructon, put it back to the buffer
                     buffer.put(instr_)
+    
+    def issue(self, eu : ExecUnit, instr : isa.Instruction, rob_idx : int):
+        """Issue an instruction to an execution unit"""
+        # First get the entry type for this execution unit
+        entry_t = eu.rs.entry_t
+
+        # Create an entry
+        entry = entry_t.convertToEntry(instr)
+
+        # Update the entry with basic info
+        entry.setPC(instr.pc)
+        entry.setROBIdx(rob_idx)
+        entry.setInstr(instr.mnemo)
+
+        # Issue the entry to the execution unit
+        could_issue = eu.issue(entry)
+
+        return could_issue
+
+
+
+
