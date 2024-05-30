@@ -2,6 +2,7 @@ from queue import Queue
 from arith_unit import ArithUnit
 from exec_unit import ExecUnit
 from rs import ReservationStationEntry
+from customQueue import CustomQueue
 import isa
 
 
@@ -53,7 +54,7 @@ class Dispatcher(object):
         In the beginning, the rob_idx is None, but when the ROB has space, the
         instruction is allocated a space in the ROB and the rob_idx is updated.
         """
-        self.buffer_o = [Queue(1) for _ in range(n_issue)]
+        self.buffer_o = CustomQueue(max_size=self.n_issue)
 
         # Instruction Queue
         self.iq = None
@@ -85,51 +86,48 @@ class Dispatcher(object):
 
     def step(self):
         """Steps to perform in a cycle:
-        1. Iterate over the buffers, if there is an instruction, issue it by
-        removing it from the buffer and sending it to the execution unit.
-        If we find a hole in the buffer, place an instruction from the instruction
-        queue.
+        1. Pull in new instructions if there is space.
+        2. Pop all instructions pulled into the ROB if there is space in Reservation Stations.
         """
-        for buffer in self.buffer_o:
-            # Check if the buffer is empty
-            if buffer.empty():
-                # Check if we can issue an instruction
-                if not self.iq.empty():
-                    instr = self.iq.get()
-                    buffer.put(instr)
+
+        # Step 1
+        while not self.buffer_o.full():
+            # Check if we can pull in new instructions
+            if not self.iq.empty():
+                self.enqueueInstruction()
             else:
-                # See if we can issue the instruction
-                instr_ = buffer.get()
+                break
 
-                # Check if the instruction was allocated in the ROB
-                if instr_["rob_idx"] is None:
-                    # Put instruction back to the buffer
-                    buffer.put(instr_)
-                    # Continue to the next buffer entry
-                    continue
 
-                instr_obj = Dispatcher.convertInstr(
-                    instr_["line"],
-                    instr_["address"],
-                    instr_["hex_code"],
-                    instr_["mnemo"]
-                )
+        # Step 2
+        for i, instr_ in enumerate(self.buffer_o):
+            # Check if the instruction was not allocated in the ROB
+            if instr_["rob_idx"] is None:
+                # Continue to the next entry
+                continue
 
-                # See which execution unit can handle this instruction
-                eus = Dispatcher.rules[instr_obj.getType()]
+            instr_obj = Dispatcher.convertInstr(
+                instr_["line"],
+                instr_["address"],
+                instr_["hex_code"],
+                instr_["mnemo"]
+            )
 
-                if (len(eus) == 0):
-                    raise Exception(f"No execution unit can accept this instruction {instr_obj}")
-                
-                # Iterate over the execution units
-                could_issue = False
+            # See which execution unit can handle this instruction
+            eus = Dispatcher.rules[instr_obj.getType()]
 
-                for eu in eus:
-                    could_issue = self.issue(eu, instr_obj, instr_["rob_idx"])
+            if (len(eus) == 0):
+                raise Exception(f"No execution unit can accept this instruction {instr_obj}")
+            
+            # Iterate over the execution units
+            could_issue = False
 
-                if (could_issue == False):
-                    # If couldn't issue the instructon, put it back to the buffer
-                    buffer.put(instr_)
+            for eu in eus:
+                could_issue = self.issue(eu, instr_obj, instr_["rob_idx"])
+
+                # If could issue, then free buffer entry
+                if could_issue:
+                    self.buffer_o.pop_at(i)
     
     def issue(self, eu : ExecUnit, instr : isa.Instruction, rob_idx : int):
         """Issue an instruction to an execution unit"""
@@ -149,6 +147,21 @@ class Dispatcher(object):
 
         return could_issue
 
+    def enqueueInstruction(self):
+        """Enqueue an instruction to the dispatcher."""
+        instr = self.iq.get()
 
+        instr["rob_idx"] = None
 
+        self.buffer_o.enqueue(instr)
+        
+    def getIssuableInstructions(self, n):
+        """Get n instructions that can be allocated in ROB."""
+        instrs = []
 
+        while not self.iq.empty() and len(instrs) < n:
+            instr = self.buffer_o.dequeue()
+            instrs.append(instr)
+        
+        return instrs
+    
