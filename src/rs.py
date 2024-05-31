@@ -127,8 +127,10 @@ class ReservationStation(ABC):
                 continue
 
             if e["entry"].rs1_idx == rd_idx:
+                print(f"Updating RS1 entry {e['entry']} with value {value}")
                 e["entry"].rs1_value = value
             if e["entry"].rs2_idx == rd_idx:
+                print(f"Updating RS2 entry {e['entry']} with value {value}")
                 e["entry"].rs2_value = value
             
             # Check if this entry is ready

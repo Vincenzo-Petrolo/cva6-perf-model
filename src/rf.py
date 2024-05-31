@@ -19,3 +19,7 @@ class RF( object ):
     def __setitem__(s, idx: int, value: int):
         """Write the value to the register."""
         s.write(idx, value)
+    
+    def __str__(self) -> str:
+        """Dump all the register file content."""
+        return "\n".join([f"RF[{i}]={self.regs[i]}" for i in range(32)])

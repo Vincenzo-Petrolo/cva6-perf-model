@@ -88,6 +88,16 @@ class ROB():
             return None
         entry = self.entries[self.head]
 
+        # Make a copy of the entry
+        entry_copy = ROBEntry()
+        entry_copy.instruction = entry.instruction
+        entry_copy.instr_pc = entry.instr_pc
+        entry_copy.res_ready = entry.res_ready
+        entry_copy.res_value = entry.res_value
+        entry_copy.rd_idx = entry.rd_idx
+        entry_copy.valid = entry.valid
+
+
         # Invalidate the current entry
         entry.valid = False
 
@@ -97,7 +107,7 @@ class ROB():
         self.head = (self.head + 1) % self.size
         self.count -= 1
 
-        return entry
+        return entry_copy
 
     def peek(self) -> ROBEntry:
         if self.is_empty():
@@ -132,10 +142,18 @@ class ROB():
         return self.size
     
     def searchOperand(self, rs_idx: int, inst_addr : int) -> ROBEntry:
-        for entry in self.entries:
-            # Check if the entry is valid and the destination register matches
-            if entry.rd_idx == rs_idx and entry.valid and inst_addr != entry.instr_pc:
+        """Searches the most recent entry that has rd_idx with the rs_idx
+        it must be valid, and of course, it must not be the current instruction.
+        Keep in mind that the ROB is a circular buffer, so we must search
+        from the head to the tail."""
+        i = self.head
+        while i != self.tail:
+            entry = self.entries[i]
+
+            if entry.rd_idx == rs_idx and entry.valid and entry.instr_pc != inst_addr:
                 return entry
+
+            i = (i+1) % self.size
         return None
     
     def canCommit(self) -> bool:

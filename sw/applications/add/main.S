@@ -19,7 +19,10 @@ fromhost: .dword 0
 .globl _start
 
 _start:
+        addi t2, t1, 10; # t0 = t1 + 10
+        addi t1, t2, 20; # t1 = t2 + 20
         add t0, t1, t2; # t0 = t1 + t2
+
         
         j tohost_exit # just terminate with exit code 0
 

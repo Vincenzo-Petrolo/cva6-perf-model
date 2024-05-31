@@ -33,7 +33,7 @@ class Scheduler(object):
         """Connect the objects"""
         self.dispatcher.connectIQ(self.iq)
         self.dispatcher.connectRF(self.rf)
-        self.dispatcher.connectROB(self.commit_unit.rob)
+        self.dispatcher.connectCommitUnit(self.commit_unit)
 
         # make the arithmetic unit visible for the dispatcher
         self.dispatcher.register(self.arith_unit)

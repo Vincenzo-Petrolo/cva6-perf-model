@@ -56,7 +56,7 @@ class CommitUnit( object ):
             # Step 3 If the entry is valid, write to the RF
             print(f"Committing Instruction: {entry.instruction} at 0x{entry.instr_pc:08X}")
             if entry.valid:
-                self.rf[entry.rd_idx] = entry.res_value
+                self.rf.write(entry.rd_idx, entry.res_value)
         
         if (full):
             # If the commit queue was full, then only this operation is performed
@@ -71,7 +71,9 @@ class CommitUnit( object ):
         if self.rob.canCommit():
             entry = self.rob.pop()
 
+
             # Step 5, TODO could skip this if the instr is not valid
+            print(f"Going to commit {entry.instruction} at 0x{entry.instr_pc:08X} with valid {entry.valid}")
             self.commit_queue.put(entry)
         
         if (full):

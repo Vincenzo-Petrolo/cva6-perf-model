@@ -62,8 +62,8 @@ class Dispatcher(object):
         # Register File
         self.rf = None
 
-        # Reorder Buffer
-        self.rob = None
+        # Commit Unit
+        self.commit_unit = None
 
     def register(self, eu):
         """Register the execution unit to the Dispatcher."""
@@ -79,10 +79,10 @@ class Dispatcher(object):
         """
         self.rf = rf
     
-    def connectROB(self, rob):
+    def connectCommitUnit(self, commit_unit):
         """Connect the reorder buffer to the dispatcher.
         """
-        self.rob = rob
+        self.commit_unit = commit_unit
 
     
     def check(self):
@@ -91,8 +91,8 @@ class Dispatcher(object):
             raise Exception("Instruction Queue is not connected to the dispatcher.")
         if self.rf is None:
             raise Exception("Register File is not connected to the dispatcher.")
-        if self.rob is None:
-            raise Exception("Reorder Buffer is not connected to the dispatcher.")
+        if self.commit_unit is None:
+            raise Exception("Commit Unit is not connected to the dispatcher.")
         
 
     def step(self):
@@ -103,7 +103,7 @@ class Dispatcher(object):
         self.check()
 
         # Step 1
-        while not self.buffer_o.full() and self.rob.freeSlots() > 0:
+        while not self.buffer_o.full() and self.commit_unit.rob.freeSlots() > 0:
             # Check if we can pull in new instructions
             if not self.iq.empty():
                 self.enqueueInstruction()
@@ -142,7 +142,7 @@ class Dispatcher(object):
 
         entry = entry_t.convertToEntry(instr)
 
-        entry.forwardOperands(self.rf, self.rob)
+        entry.forwardOperands(self.rf, self.commit_unit)
 
         # Issue the entry to the execution unit
         could_issue = eu.issue(entry)
@@ -156,7 +156,7 @@ class Dispatcher(object):
         """Enqueue an instruction to the dispatcher."""
         instr = self.iq.get()
 
-        rob_idx = self.rob.push(instr)
+        rob_idx = self.commit_unit.rob.push(instr)
 
         # Update the rob index of the issued instructions
         instr.rob_idx = rob_idx

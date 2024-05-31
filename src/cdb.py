@@ -53,13 +53,14 @@ class CommonDataBus(object):
         for eu in self.EUS:
             # Step 3
             if eu.hasResult():
-                print(f"CDB Step, getting results from {eu}")
                 # Step 4
-                self.buffer_o.put(eu.getResult())
+                result = eu.getResult()
+                print(f"CDB Step, getting {result} from {eu}")
+                self.buffer_o.put(result)
                 # Step 5
                 for eu in self.EUS:
-                    eu.rs.updateFromCDB(self.buffer_o.queue[0]["rd_idx"],
-                                        self.buffer_o.queue[0]["res_value"]
+                    eu.rs.updateFromCDB(result["rd_idx"],
+                                        result["res_value"]
                     )
                 
                 break

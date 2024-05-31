@@ -87,21 +87,25 @@ class arithReservationStationEntry(ReservationStationEntry):
 
         if (entry is not None):
             if (entry.res_ready):
+                print(f"Forwarding rs1 value {entry.res_value} to {self}")
                 self.rs1_value = entry.res_value
         else:
             # No in-flight instruction is computing the value, so get it from RF
+            print(f"Fetching rs1 value {rf[self.rs1_idx]} from RF {self}")
             self.rs1_value = rf[self.rs1_idx]
 
 
         if (arithReservationStationEntry.Rtype(self.op)):
-            # R-type
+            # R-type, search for RS2 too
             entry = commit_unit.searchOperand(self.rs2_idx, self.pc)
 
             if (entry is not None):
                 if (entry.res_ready):
+                    print(f"Forwarding rs2 value {entry.res_value} to {self}")
                     self.rs2_value = entry.res_value
             else:
                 # No in-flight instruction is computing the value, so get it from RF
+                print(f"Fetching rs2 value {rf[self.rs2_idx]} from RF {self}")
                 self.rs2_value = rf[self.rs2_idx]
 
 
