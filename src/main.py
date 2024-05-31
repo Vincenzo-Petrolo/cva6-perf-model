@@ -16,7 +16,7 @@ def main():
 
     i = 0
 
-    while True:
+    while i < 50: # Just for debugging
         print(f"Step {i}")
         scheduler.step()
 

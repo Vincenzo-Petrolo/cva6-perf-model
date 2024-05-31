@@ -19,7 +19,7 @@ class Scheduler(object):
 
         self.dispatcher = Dispatcher()
 
-        self.arith_unit = ArithUnit(4, 1, True)
+        self.arith_unit = ArithUnit(2, 1, True)
 
         self.cdb = CommonDataBus()
 

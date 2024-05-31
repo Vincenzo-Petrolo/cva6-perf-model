@@ -138,7 +138,6 @@ class Dispatcher(object):
         """Issue an instruction to an execution unit"""
         """TODO, it sucks that we have to do such horrible stuff in here, but it
         is correct from RTL standpoint."""
-        print(f"Issuing instruction {instr} to {eu} at rob idx {instr.rob_idx}")
         entry_t = eu.rs.entry_t
 
         entry = entry_t.convertToEntry(instr)
@@ -147,6 +146,9 @@ class Dispatcher(object):
 
         # Issue the entry to the execution unit
         could_issue = eu.issue(entry)
+
+        if (could_issue):
+            print(f"Issuing instruction {instr} to {eu} at rob idx {instr.rob_idx}")
 
         return could_issue
 

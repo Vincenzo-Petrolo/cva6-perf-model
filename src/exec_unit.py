@@ -62,6 +62,8 @@ class ExecUnit(ABC):
                 "rob_idx": result["rob_idx"]
             }
         )
+        # Update the result in the reservation station
+        self.rs.updateResult(result["rob_idx"], result["res_value"])
 
     def getResult(self):
         return self.buffer_o.get()
