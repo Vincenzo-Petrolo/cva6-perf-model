@@ -30,7 +30,6 @@ class CommitUnit( object ):
         3. Commit the instruction by writing to the RF.
         4. Pop from the ROB if the instruction is ready.
         5. Push the instruction to the commit queue.
-        6. Pull from the Dispatcher.
         All of this happens if everything has space, otherwise if one in the 
         pipeline is full, then the remaining steps will stall.
         """
@@ -55,6 +54,7 @@ class CommitUnit( object ):
         if not self.commit_queue.empty():
             entry = self.commit_queue.get()
             # Step 3 If the entry is valid, write to the RF
+            print(f"Committing Instruction: {entry.instruction} at 0x{entry.instr_pc:08X}")
             if entry.valid:
                 self.rf[entry.rd_idx] = entry.res_value
         
@@ -78,18 +78,6 @@ class CommitUnit( object ):
             # If the ROB was full, then only this operation is performed
             # at this time, must wait the next cycle
             return
-        
-        # Step 6, can pull instructions from the dispatcher
-        free_slots = self.rob.freeSlots()
-
-        # Get the instructions from the dispatcher
-        instrs = self.dispatcher.getIssuableInstructions(free_slots)
-
-        for instr in instrs:
-            rob_idx = self.rob.push(instr)
-            # Update the rob index of the issued instructions
-            instr.rob_idx = rob_idx
-
 
         # End
 

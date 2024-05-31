@@ -103,7 +103,7 @@ class Dispatcher(object):
         self.check()
 
         # Step 1
-        while not self.buffer_o.full():
+        while not self.buffer_o.full() and self.rob.freeSlots() > 0:
             # Check if we can pull in new instructions
             if not self.iq.empty():
                 self.enqueueInstruction()
@@ -153,6 +153,11 @@ class Dispatcher(object):
     def enqueueInstruction(self):
         """Enqueue an instruction to the dispatcher."""
         instr = self.iq.get()
+
+        rob_idx = self.rob.push(instr)
+
+        # Update the rob index of the issued instructions
+        instr.rob_idx = rob_idx
 
         self.buffer_o.enqueue(instr)
         
