@@ -85,6 +85,11 @@ $(BUILD_DIR)/spike-trace.log: $(BUILD_DIR)/main.elf
 	spike --log=$@ -l --isa=rv32i $<
 	cp $@ $(BUILD_DIR)/applications/$(PROJECT)/
 
+.PHONY: vendor-opcodes
+vendor-opcodes:
+	python3 util/vendor.py sw/vendor/riscv-opcodes.vendor.hjson
+	
+
 
 # Utils
 # -----
