@@ -93,10 +93,10 @@ class CommitUnit( object ):
         """Connect the dispatcher to the commit unit."""
         self.dispatcher = dispatcher
 
-    def searchOperand(self, rs_idx: int) -> int:
+    def searchOperand(self, rs_idx: int, instr_addr : int) -> int:
         """Search for the operand in the commit stage for forwarding."""
         # Search in the ROB
-        operand = self.rob.searchOperand(rs_idx)
+        operand = self.rob.searchOperand(rs_idx, instr_addr)
         
         # Found
         if (operand is not None):

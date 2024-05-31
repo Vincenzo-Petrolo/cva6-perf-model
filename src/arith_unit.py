@@ -46,7 +46,7 @@ class arithReservationStationEntry(ReservationStationEntry):
             entry.rs2_idx = instr.fields().rs2
             entry.func7 = instr.fields().funct7
         elif (instr.getType() is isa.Itype):
-            entry.imm = instr.imm
+            entry.imm = instr.fields().imm
 
 
         return entry
@@ -63,22 +63,49 @@ class arithReservationStationEntry(ReservationStationEntry):
         self.rs2_value  = None
         self.op         = None
     
+    def Rtype(op):
+        return op == 0b0110011
+
+    def Itype(op):
+        return op == 0b0010011
+    
     def isReady(self):
-        return self.rs1_value is not None and self.rs2_value is not None
+        if (arithReservationStationEntry.Rtype(self.op)):
+            # R-type
+            return self.rs1_value is not None and self.rs2_value is not None
+        elif (arithReservationStationEntry.Itype(self.op)):
+            # I-type
+            return self.rs1_value is not None
+        else:
+            raise Exception(f"Error op={self.op} not recognized.")
 
-    def fillOperands(self, rf: RF, commit_unit: CommitUnit):
+    def forwardOperands(self, rf: RF, commit_unit: CommitUnit):
         """Search in the Commit Unit first"""
-        if (self.rs1_idx is not None):
-            self.rs1_value = commit_unit.searchOperand(self.rs1_idx)
-        if (self.rs2_idx is not None):
-            self.rs2_value = commit_unit.searchOperand(self.rs2_idx)
-        
-        """If not found in the Commit Unit, search in the RF"""
-        if (self.rs1_value is None):
-            self.rs1_value = rf.read(self.rs1_idx)
-        if (self.rs2_value is None):
-            self.rs2_value = rf.read(self.rs2_idx)
 
+        # Search for rs1
+        entry = commit_unit.searchOperand(self.rs1_idx, self.pc)
+
+        if (entry is not None):
+            if (entry.res_ready):
+                self.rs1_value = entry.res_value
+        else:
+            # No in-flight instruction is computing the value, so get it from RF
+            self.rs1_value = rf[self.rs1_idx]
+
+
+        if (arithReservationStationEntry.Rtype(self.op)):
+            # R-type
+            entry = commit_unit.searchOperand(self.rs2_idx, self.pc)
+
+            if (entry is not None):
+                if (entry.res_ready):
+                    self.rs2_value = entry.res_value
+            else:
+                # No in-flight instruction is computing the value, so get it from RF
+                self.rs2_value = rf[self.rs2_idx]
+
+
+        
 class ArithUnit(ExecUnit):
     """
     Arithmetic Unit class, can be used to create different types of execution units
@@ -88,12 +115,77 @@ class ArithUnit(ExecUnit):
         super().__init__(n_entries, arithReservationStationEntry, latency, iterative)
 
     def execute(self, entry : ReservationStationEntry):
-        """Implement the execution of the instruction.
-        You are given with an entry from the reservation station
-        and must perform operation with it. 
-        """
-        match entry.op:
-            case 51: #TODO change me
-                return entry.rs1_value + entry.rs2_value
+        """Execute the requested operation."""
+
+
+        match entry.op: # Decoder
+            case 0b0110011:
+                if (entry.func3 == 0b000 and entry.func7 == 0b0000000):
+                    # ADD
+                    return entry.rs1_value + entry.rs2_value
+                elif (entry.func3 == 0b000 and entry.func7 == 0b0100000):
+                    # SUB
+                    return entry.rs1_value - entry.rs2_value
+                elif (entry.func3 == 0b111 and entry.func7 == 0b0000000):
+                    # AND
+                    return entry.rs1_value & entry.rs2_value
+                elif (entry.func3 == 0b110 and entry.func7 == 0b0000000):
+                    # OR
+                    return entry.rs1_value | entry.rs2_value
+                elif (entry.func3 == 0b100 and entry.func7 == 0b0000000):
+                    # XOR
+                    return entry.rs1_value ^ entry.rs2_value
+                elif (entry.func3 == 0b001 and entry.func7 == 0b0000000):
+                    # SLL
+                    return entry.rs1_value << entry.rs2_value
+                elif (entry.func3 == 0b101 and entry.func7 == 0b0000000):
+                    # SRL
+                    return entry.rs1_value >> entry.rs2_value
+                elif (entry.func3 == 0b101 and entry.func7 == 0b0100000):
+                    # SRA #todo fix
+                    return entry.rs1_value >> entry.rs2_value
+                elif (entry.func3 == 0b110 and entry.func7 == 0b0000000):
+                    # SLT
+                    return 1 if entry.rs1_value < entry.rs2_value else 0
+                elif (entry.func3 == 0b111 and entry.func7 == 0b0000000):
+                    # SLTU
+                    return 1 if ArithUnit.to_unsigned_64bit(entry.rs1_value) < ArithUnit.to_unsigned_64bit(entry.rs2_value) else 0
+                else:
+                    raise Exception("Not implemented yet.")
+            case 0b0010011:
+                if (entry.func3 == 0b000):
+                    # ADDI
+                    return entry.rs1_value + entry.imm
+                elif (entry.func3 == 0b111):
+                    # ANDI
+                    return entry.rs1_value & entry.imm
+                elif (entry.func3 == 0b110):
+                    # ORI
+                    return entry.rs1_value | entry.imm
+                elif (entry.func3 == 0b100):
+                    # XORI
+                    return entry.rs1_value ^ entry.imm
+                elif (entry.func3 == 0b001):
+                    # SLLI
+                    return entry.rs1_value << entry.imm
+                elif (entry.func3 == 0b101 and entry.func7 == 0b0000000):
+                    # SRLI
+                    return entry.rs1_value >> entry.imm
+                elif (entry.func3 == 0b101 and entry.func7 == 0b0100000):
+                    # SRAI  #todo fix
+                    return entry.rs1_value >> entry.imm
+                elif (entry.func3 == 0b110):
+                    # SLTI
+                    return 1 if entry.rs1_value < entry.imm else 0
+                elif (entry.func3 == 0b111):
+                    # SLTIU
+                    return 1 if ArithUnit.to_unsigned_64bit(entry.rs1_value) < ArithUnit.to_unsigned_64bit(entry.imm) else 0
+                else:
+                    raise Exception("Not implemented yet.")
+
             case _:
                 raise Exception("Not implemented yet.")
+    
+    def to_unsigned_64bit(value):
+        """Utility function to convert a signed 64-bit value to unsigned 64-bit value."""
+        return value & 0xFFFFFFFFFFFFFFFF

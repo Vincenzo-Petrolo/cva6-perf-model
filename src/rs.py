@@ -59,7 +59,7 @@ class ReservationStationEntry(object):
         pass
 
     @abstractmethod
-    def fillOperands(self, rf : RF, commit_unit : CommitUnit):
+    def forwardOperands(self, rf : RF, commit_unit : CommitUnit):
         """Fill the operands of the entry by forwarding from RF or from ROB."""
         """You must implement this, remember to always look for the value in the ROB first."""
         """Then fetch from the RF"""
@@ -119,13 +119,16 @@ class ReservationStation(ABC):
         self.entries[idx]["status"] = "clear" 
         self.entries[idx]["entry"].reset()
 
-    def updateFromCDB(self, rob_idx, value):
+    def updateFromCDB(self, rd_idx, value):
         """When the CDB broadcasts a new computed value, the Reservation Station
         must update the entries that are waiting for that value."""
         for e in self.entries:
-            if e["entry"].rs1_idx == rob_idx:
+            if (e["status"] == "clear"):
+                continue
+
+            if e["entry"].rs1_idx == rd_idx:
                 e["entry"].rs1_value = value
-            if e["entry"].rs2_idx == rob_idx:
+            if e["entry"].rs2_idx == rd_idx:
                 e["entry"].rs2_value = value
             
             # Check if this entry is ready

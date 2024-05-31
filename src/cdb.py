@@ -42,6 +42,7 @@ class CommonDataBus(object):
         2. Iterate over the execution units.
         3. Check if the execution unit has a result ready.
         4. If the result is ready, update the current output.
+        5. Scan all the reservation stations and forward the result.
         """
         # Step 1
         if (self.buffer_o.full()):
@@ -55,3 +56,11 @@ class CommonDataBus(object):
                 print(f"CDB Step, getting results from {eu}")
                 # Step 4
                 self.buffer_o.put(eu.getResult())
+                # Step 5
+                for eu in self.EUS:
+                    eu.rs.updateFromCDB(self.buffer_o.queue[0]["rd_idx"],
+                                        self.buffer_o.queue[0]["res_value"]
+                    )
+                
+                break
+

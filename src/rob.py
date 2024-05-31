@@ -131,10 +131,10 @@ class ROB():
     def __len__(self) -> int:
         return self.size
     
-    def searchOperand(self, rs_idx: int) -> ROBEntry:
+    def searchOperand(self, rs_idx: int, inst_addr : int) -> ROBEntry:
         for entry in self.entries:
             # Check if the entry is valid and the destination register matches
-            if entry.rd_idx == rs_idx and entry.valid:
+            if entry.rd_idx == rs_idx and entry.valid and inst_addr != entry.instr_pc:
                 return entry
         return None
     

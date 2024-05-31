@@ -142,7 +142,7 @@ class Dispatcher(object):
 
         entry = entry_t.convertToEntry(instr)
 
-        entry.fillOperands(self.rf, self.rob)
+        entry.forwardOperands(self.rf, self.rob)
 
         # Issue the entry to the execution unit
         could_issue = eu.issue(entry)
