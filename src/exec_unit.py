@@ -31,15 +31,15 @@ class ExecUnit(ABC):
     def execute(self, entry : ReservationStationEntry):
         """Implement the execution of the instruction.
         You are given with an entry from the reservation station
-        and must perform operation with it. 
+        and must perform operation with it. Return the result.
         """
-        pass
+        return None
     
     def startExecution(self, entry):
         self.setExecuting()
 
-        res_value   = self.execute(entry)
-        rob_idx     = entry.getROBIdx()
+        res_value   = self.execute(entry["entry"])
+        rob_idx     = entry["entry"].getROBIdx()
 
         # Push the result to the pipeline
         self.pipeline.addInstruction(
@@ -64,12 +64,12 @@ class ExecUnit(ABC):
     def getResult(self):
         return self.buffer_o.get()
     
-    def issue(self, instr) -> bool:
+    def issue(self, entry : ReservationStationEntry) -> bool:
         """Issue an instruction to the execution unit.
         If the instruction is issued, it is converted to an entry
         and stored in the reservation station.
         """
-        return self.rs.issue(instr)
+        return self.rs.issue(entry)
     
     def setIdle(self):
         self.status = 'idle'
@@ -90,14 +90,16 @@ class ExecUnit(ABC):
         # Step 1 & 2
         if self.buffer_o.empty() and self.pipeline.getLastInstruction() is not None:
             result = self.pipeline.popLastInstruction()
-            self.setExecutionDone(result)
+            self.setResult(result)
 
         # Step 3
         self.pipeline.advance()
 
         if self.pipeline.canGetNewInstruction():
-
             entry = self.rs.getEntryReadyForExecution()
+
+            if (entry is None):
+                return
 
             # Execute the instruction, if it is  None, then a bubble is inserted
             self.startExecution(entry)

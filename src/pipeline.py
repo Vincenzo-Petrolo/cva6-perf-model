@@ -1,5 +1,9 @@
 class Pipeline:
-    def __init__(self, num_stages: int, iterative : bool = False):
+    def __init__(self, num_stages: int = 2, iterative : bool = False):
+
+        if (num_stages < 2):
+            raise ValueError("Pipeline must have at least 2 stages")
+
         self.num_stages = num_stages
 
         self.stages = [None for _ in range(num_stages)] 
@@ -13,6 +17,8 @@ class Pipeline:
         """
         if (self.iterative and self._hasInFlightInstruction()):
             return False
+
+        print(f"Adding instruction {instruction} to pipeline")
         
         self.stages[0] = instruction
 
@@ -27,13 +33,13 @@ class Pipeline:
 
     def advance(self):
         #? This is not very efficient, but it is simple
-        # todo: test with n_stages = 1
         # Move instructions through the pipeline
         for i in range(self.num_stages-1, 0, -1):
             # Do not overwrite the i-th instruction
             # because if it is not None, it means it could not be
             # moved to the next stage
             if (self.stages[i] is None):
+                print(f"Moving instruction {self.stages[i-1]} to stage {i}")
                 self.stages[i] = self.stages[i-1]
 
     def popLastInstruction(self):
@@ -48,7 +54,7 @@ class Pipeline:
     
     def canGetNewInstruction(self):
         if (self.iterative):
-            return self._hasInFlightInstruction()
+            return not self._hasInFlightInstruction()
         
         # If first entry is None, I can get a new instruction
         return self.stages[0] is None

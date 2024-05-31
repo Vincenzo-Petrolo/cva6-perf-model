@@ -2,6 +2,7 @@ from arith_unit import ArithUnit
 from exec_unit import ExecUnit
 from customQueue import CustomQueue
 from instr import Instruction
+from rs import ReservationStationEntry
 import isa
 
 
@@ -57,6 +58,12 @@ class Dispatcher(object):
 
         # Instruction Queue
         self.iq = None
+        
+        # Register File
+        self.rf = None
+
+        # Reorder Buffer
+        self.rob = None
 
     def register(self, eu):
         """Register the execution unit to the Dispatcher."""
@@ -67,10 +74,25 @@ class Dispatcher(object):
         """
         self.iq = iq
     
+    def connectRF(self, rf):
+        """Connect the register file to the dispatcher.
+        """
+        self.rf = rf
+    
+    def connectROB(self, rob):
+        """Connect the reorder buffer to the dispatcher.
+        """
+        self.rob = rob
+
+    
     def check(self):
         """Check if instruction queue is connected"""
         if self.iq is None:
             raise Exception("Instruction Queue is not connected to the dispatcher.")
+        if self.rf is None:
+            raise Exception("Register File is not connected to the dispatcher.")
+        if self.rob is None:
+            raise Exception("Reorder Buffer is not connected to the dispatcher.")
         
 
     def step(self):
@@ -78,6 +100,7 @@ class Dispatcher(object):
         1. Pull in new instructions if there is space.
         2. Pop all instructions pulled into the ROB if there is space in Reservation Stations.
         """
+        self.check()
 
         # Step 1
         while not self.buffer_o.full():
@@ -113,8 +136,16 @@ class Dispatcher(object):
     
     def issue(self, eu : ExecUnit, instr : Instruction):
         """Issue an instruction to an execution unit"""
+        """TODO, it sucks that we have to do such horrible stuff in here, but it
+        is correct from RTL standpoint."""
+        entry_t = eu.rs.entry_t
+
+        entry = entry_t.convertToEntry(instr)
+
+        entry.fillOperands(self.rf, self.rob)
+
         # Issue the entry to the execution unit
-        could_issue = eu.issue(instr)
+        could_issue = eu.issue(entry)
 
         return could_issue
 

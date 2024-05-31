@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from instr import Instruction
-import isa
+from rf import RF
+from commit_unit import CommitUnit
 
 class ReservationStationEntry(object):
     """Resembles the Reservation Station Entry of a generic Unit of LEN5 processor."""
@@ -41,17 +42,8 @@ class ReservationStationEntry(object):
         return self.rob_idx
     
     @abstractmethod
-    def convertToEntry(instr : dict):
+    def convertToEntry(instr : Instruction):
         """Implement me and return an entry of the type of the Reservation Station Entry."""
-        """Instruction is received as a dictionary with the following keys
-        {
-            "line"      : str,
-            "address"   : int,
-            "hex_code"  : str,
-            "mnemo"     : str,
-            "rob_idx"   : int
-        }
-        """
         pass
 
     @abstractmethod
@@ -66,7 +58,12 @@ class ReservationStationEntry(object):
         """
         pass
 
-
+    @abstractmethod
+    def fillOperands(self, rf : RF, commit_unit : CommitUnit):
+        """Fill the operands of the entry by forwarding from RF or from ROB."""
+        """You must implement this, remember to always look for the value in the ROB first."""
+        """Then fetch from the RF"""
+        pass
 
 
 class ReservationStation(ABC):
@@ -95,7 +92,7 @@ class ReservationStation(ABC):
     def __repr__(self):
         return self.__str__()
     
-    def issue(self, instr) -> bool:
+    def issue(self, entry : ReservationStationEntry) -> bool:
         """Issue an entry to the Reservation Station.
         If there is an empty entry, the instruction is converted to an entry,
         and the entry is stored in the Reservation Station.
@@ -104,7 +101,7 @@ class ReservationStation(ABC):
         """
         for e in self.entries:
             if e["status"] == "clear":
-                e["entry"] = self.entry_t.convertToEntry(instr)
+                e["entry"] = entry
                 # Check if the entry is ready to be executed
                 if e["entry"].isReady():
                     e["status"] = "ready"

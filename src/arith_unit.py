@@ -1,4 +1,6 @@
+from commit_unit import CommitUnit
 from exec_unit import ExecUnit
+from rf import RF
 from rs import ReservationStationEntry
 
 import instr, isa
@@ -20,7 +22,7 @@ class arithReservationStationEntry(ReservationStationEntry):
 
 
     def __str__(self):
-        return f"arithReservationStationEntry(pc={self.pc}, instr={self.instr}, ready={self.ready}, res_value={self.res_value}, rd_idx={self.rd_idx}, rs1_idx={self.rs1_idx}, rs1_value={self.rs1_value}, rs2_idx={self.rs2_idx}, rs2_value={self.rs2_value}, op={self.op})"
+        return f"arithReservationStationEntry(pc={self.pc}, instr={self.instr}, ready={self.isReady()}, res_value={self.res_value}, rd_idx={self.rd_idx}, rs1_idx={self.rs1_idx}, rs1_value={self.rs1_value}, rs2_idx={self.rs2_idx}, rs2_value={self.rs2_value}, op={self.op})"
     
     def __repr__(self):
         return self.__str__()
@@ -63,6 +65,19 @@ class arithReservationStationEntry(ReservationStationEntry):
     def isReady(self):
         return self.rs1_value is not None and self.rs2_value is not None
 
+    def fillOperands(self, rf: RF, commit_unit: CommitUnit):
+        """Search in the Commit Unit first"""
+        if (self.rs1_idx is not None):
+            self.rs1_value = commit_unit.searchOperand(self.rs1_idx)
+        if (self.rs2_idx is not None):
+            self.rs2_value = commit_unit.searchOperand(self.rs2_idx)
+        
+        """If not found in the Commit Unit, search in the RF"""
+        if (self.rs1_value is None):
+            self.rs1_value = rf.read(self.rs1_idx)
+        if (self.rs2_value is None):
+            self.rs2_value = rf.read(self.rs2_idx)
+
 class ArithUnit(ExecUnit):
     """
     Arithmetic Unit class, can be used to create different types of execution units
@@ -76,4 +91,8 @@ class ArithUnit(ExecUnit):
         You are given with an entry from the reservation station
         and must perform operation with it. 
         """
-        raise Exception("Not implemented yet.")
+        match entry.op:
+            case 51: #TODO change me
+                return entry.rs1_value + entry.rs2_value
+            case _:
+                raise Exception("Not implemented yet.")
