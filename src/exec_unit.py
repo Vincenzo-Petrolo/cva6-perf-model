@@ -103,6 +103,7 @@ class ExecUnit(ABC):
 
         if self.pipeline.canGetNewInstruction():
             entry = self.rs.getEntryReadyForExecution()
+            print(f"Got ready entry {entry} from RS")
 
             if (entry is None):
                 return
