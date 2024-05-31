@@ -33,6 +33,7 @@ class arithReservationStationEntry(ReservationStationEntry):
         entry = arithReservationStationEntry()
         entry.setInstr(instr.mnemo)
         entry.setPC(instr.address)
+        entry.setROBIdx(instr.rob_idx)
         # Set common operands in R/I instr
         entry.rd_idx = instr.fields().rd
         entry.rs1_idx = instr.fields().rs1

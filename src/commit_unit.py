@@ -71,7 +71,7 @@ class CommitUnit( object ):
         cdb_entry = self.cdb.get()
 
         if cdb_entry:
-            self.rob.updateResult(cdb_entry)
+            self.rob.updateResult(cdb_entry["rd_idx"], cdb_entry["res_value"])
 
         if (full):
             # If the ROB was full, then only this operation is performed

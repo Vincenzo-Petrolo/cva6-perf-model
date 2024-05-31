@@ -18,8 +18,6 @@ class Pipeline:
         if (self.iterative and self._hasInFlightInstruction()):
             return False
 
-        print(f"Adding instruction {instruction} to pipeline")
-        
         self.stages[0] = instruction
 
         return True
@@ -39,7 +37,6 @@ class Pipeline:
             # because if it is not None, it means it could not be
             # moved to the next stage
             if (self.stages[i] is None):
-                print(f"Moving instruction {self.stages[i-1]} to stage {i}")
                 self.stages[i] = self.stages[i-1]
 
     def popLastInstruction(self):

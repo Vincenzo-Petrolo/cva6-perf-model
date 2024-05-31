@@ -39,13 +39,13 @@ class ExecUnit(ABC):
         self.setExecuting()
 
         res_value   = self.execute(entry["entry"])
-        rob_idx     = entry["entry"].getROBIdx()
+        rd_idx      = entry["entry"].rd_idx
 
         # Push the result to the pipeline
         self.pipeline.addInstruction(
             {
                 "res_value": res_value,
-                "rd_idx": rob_idx
+                "rd_idx": rd_idx
             }
         )
     

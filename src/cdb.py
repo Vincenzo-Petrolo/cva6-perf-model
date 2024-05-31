@@ -52,4 +52,4 @@ class CommonDataBus(object):
             # Step 3
             if eu.hasResult():
                 # Step 4
-                self.currentOutput = eu.getResult()
+                self.buffer_o.put(eu.getResult())
