@@ -145,7 +145,7 @@ class ReservationStation(ABC):
                 return e
         return None
     
-    def updateResult(self, rob_idx, res_value):
+    def updateResult(self, rob_idx):
         """Update the result of the instruction in the Reservation Station
         this is obtained after the execution of the entry."""
         for i, e in enumerate(self.entries):

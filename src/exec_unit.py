@@ -23,9 +23,6 @@ class ExecUnit(ABC):
         # Execution pipeline
         self.pipeline = Pipeline(latency, iterative)
 
-        # Output buffer
-        self.buffer_o   = Queue(1)
-
 
     @abstractmethod
     def execute(self, entry : ReservationStationEntry):
@@ -46,27 +43,28 @@ class ExecUnit(ABC):
             {
                 "res_value": res_value,
                 "rd_idx": rd_idx,
-                "rob_idx": entry["entry"].getROBIdx()
+                "rob_idx": entry["entry"].getROBIdx(),
+                "valid" : True
             }
         )
     
     def hasResult(self):
-        return self.buffer_o.full()
-    
-    def setResult(self, result):
-        self.buffer_o.put(
-            {
-                "res_value": result["res_value"],
-                "valid": True,
-                "rd_idx": result["rd_idx"],
-                "rob_idx": result["rob_idx"]
-            }
-        )
-        # Update the result in the reservation station
-        self.rs.updateResult(result["rob_idx"], result["res_value"])
+        """Directly access the last stage of the pipeline."""
+        return self.pipeline.getLastInstruction() is not None
 
+    
     def getResult(self):
-        return self.buffer_o.get()
+        """Pop the result from the last stage of the pipeline."""
+        
+        if (self.hasResult() == False):
+            return None
+
+        result  = self.pipeline.popLastInstruction()
+
+        # Update the result in the reservation station
+        self.rs.updateResult(result["rob_idx"])
+
+        return result
     
     def issue(self, entry : ReservationStationEntry) -> bool:
         """Issue an instruction to the execution unit.
@@ -86,21 +84,12 @@ class ExecUnit(ABC):
     
     def step(self):
         """Steps to do:
-        1. Check if buffer_o is clear, else don't pop new instructions (except if they are None)
-        2. Pop the computed instruction from the execution pipeline
-        3. Issue an instruction if pipeline is not stalled.
+        1. Issue an instruction if pipeline is not stalled.
         """
 
-        # Step 1 & 2
-        if self.buffer_o.empty() and self.pipeline.getLastInstruction() is not None:
-            print(f"{__class__} Step, popping last instruction {self.pipeline.getLastInstruction()}")
-            print(self.pipeline)
-            result = self.pipeline.popLastInstruction()
-            self.setResult(result)
-
-        # Step 3
         self.pipeline.advance()
 
+        # Step 1
         if self.pipeline.canGetNewInstruction():
             entry = self.rs.getEntryReadyForExecution()
             print(f"Got ready entry {entry} from RS")
@@ -110,4 +99,7 @@ class ExecUnit(ABC):
 
             # Execute the instruction, if it is  None, then a bubble is inserted
             self.startExecution(entry)
+
+        print(self.pipeline)
+
         
