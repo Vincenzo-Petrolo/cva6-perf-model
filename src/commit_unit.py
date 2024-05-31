@@ -37,6 +37,14 @@ class CommitUnit( object ):
         # Step 1
         self.check_connections()
 
+        print(f"CDB: {self.cdb.buffer_o.full()}")
+        cdb_entry = self.cdb.get()
+
+        print(f"Got CDB Entry: {cdb_entry}")
+
+        if cdb_entry:
+            self.rob.updateResult(cdb_entry["rd_idx"], cdb_entry["res_value"], cdb_entry["rob_idx"])
+
         # Step 2
         full = False
 
@@ -66,13 +74,6 @@ class CommitUnit( object ):
             # Step 5, TODO could skip this if the instr is not valid
             self.commit_queue.put(entry)
         
-        # before doing the last step, check if the CDB has an entry
-        # if it does, then update the result in the ROB
-        cdb_entry = self.cdb.get()
-
-        if cdb_entry:
-            self.rob.updateResult(cdb_entry["rd_idx"], cdb_entry["res_value"])
-
         if (full):
             # If the ROB was full, then only this operation is performed
             # at this time, must wait the next cycle

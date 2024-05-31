@@ -44,12 +44,14 @@ class CommonDataBus(object):
         4. If the result is ready, update the current output.
         """
         # Step 1
-        if (not self.buffer_o.empty()):
+        if (self.buffer_o.full()):
             return
+
 
         # Step 2
         for eu in self.EUS:
             # Step 3
             if eu.hasResult():
+                print(f"CDB Step, getting results from {eu}")
                 # Step 4
                 self.buffer_o.put(eu.getResult())

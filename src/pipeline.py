@@ -1,12 +1,9 @@
 class Pipeline:
-    def __init__(self, num_stages: int = 2, iterative : bool = False):
+    def __init__(self, num_stages, iterative : bool = False):
 
-        if (num_stages < 2):
-            raise ValueError("Pipeline must have at least 2 stages")
+        self.num_stages = num_stages + 1
 
-        self.num_stages = num_stages
-
-        self.stages = [None for _ in range(num_stages)] 
+        self.stages = [None for _ in range(self.num_stages)] 
 
         self.iterative = iterative
 
@@ -38,6 +35,9 @@ class Pipeline:
             # moved to the next stage
             if (self.stages[i] is None):
                 self.stages[i] = self.stages[i-1]
+                self.stages[i-1] = None
+
+        self.stages[0] = None
 
     def popLastInstruction(self):
         # Remove the instruction at the end of the pipeline
@@ -57,4 +57,4 @@ class Pipeline:
         return self.stages[0] is None
 
     def __repr__(self):
-        return f"Pipeline(stages={list(self.stages)})"
+        return f"Pipeline(stages={self.stages})"

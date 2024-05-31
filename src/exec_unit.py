@@ -45,7 +45,8 @@ class ExecUnit(ABC):
         self.pipeline.addInstruction(
             {
                 "res_value": res_value,
-                "rd_idx": rd_idx
+                "rd_idx": rd_idx,
+                "rob_idx": entry["entry"].getROBIdx()
             }
         )
     
@@ -57,7 +58,8 @@ class ExecUnit(ABC):
             {
                 "res_value": result["res_value"],
                 "valid": True,
-                "rd_idx": result["rd_idx"]
+                "rd_idx": result["rd_idx"],
+                "rob_idx": result["rob_idx"]
             }
         )
 
@@ -89,6 +91,8 @@ class ExecUnit(ABC):
 
         # Step 1 & 2
         if self.buffer_o.empty() and self.pipeline.getLastInstruction() is not None:
+            print(f"{__class__} Step, popping last instruction {self.pipeline.getLastInstruction()}")
+            print(self.pipeline)
             result = self.pipeline.popLastInstruction()
             self.setResult(result)
 

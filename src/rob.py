@@ -30,7 +30,7 @@ class ROBEntry():
         self.valid = False
 
     def __str__(self):
-        return f"ROBEntry(instruction={self.instruction}, instr_pc={self.instr_pc}, res_ready={self.res_ready}, res_value={self.res_value}, rd_idx={self.rd_idx}, rd_upd={self.rd_upd}, mem_crit={self.mem_crit}, order_crit={self.order_crit}, except_raised={self.except_raised}, except_code={self.except_code}, mem_clear={self.mem_clear})"
+        return f"ROBEntry(instruction={self.instruction}, instr_pc={self.instr_pc}, res_ready={self.res_ready}, res_value={self.res_value}, rd_idx={self.rd_idx}, valid={self.valid})"
 
     def __repr__(self):
         return self.__str__()
@@ -89,7 +89,10 @@ class ROB():
         entry = self.entries[self.head]
 
         # Invalidate the current entry
-        self.entries[self.head].valid = False
+        entry.valid = False
+
+        # Clear the ROB Entry
+        self.entries[self.head] = ROBEntry()
 
         self.head = (self.head + 1) % self.size
         self.count -= 1
@@ -107,13 +110,17 @@ class ROB():
         self.count = 0
         self.entries = [ROBEntry() for _ in range(self.size)]
     
-    def updateResult(self, rd_idx: int, res_value: int) -> None:
+    def updateResult(self, rd_idx: int, res_value: int, rob_idx : int) -> None:
         """Update the result of the instruction in the ROB, this comes from the CDB."""
-        for entry in self.entries:
-            if entry.rd_idx == rd_idx:
-                entry.res_ready = True
-                entry.res_value = res_value
-                entry.valid = True
+        print(f"Updating result for ROB Entry {rob_idx}")
+        entry = self.entries[rob_idx]
+
+        if entry.rd_idx == rd_idx:
+            entry.res_ready = True
+            entry.res_value = res_value
+            entry.valid = True
+        else:
+            raise ValueError(f"ROB Entry {rob_idx} does not match the destination register {rd_idx}")
 
     def __getitem__(self, key: int) -> ROBEntry:
         return self.entries[key]

@@ -54,6 +54,8 @@ class Scheduler(object):
         self.arith_unit.step()
         self.dispatcher.step()
 
+        print(self.commit_unit.rob)
+
         if (self.check()):
             raise Exception("Simulation is over")
 
