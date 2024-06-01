@@ -83,43 +83,43 @@ class arithReservationStationEntry(ReservationStationEntry):
         #todo split it into smaller functions
         #todo think of implementing all this searchin into the base exec unit class
 
-        print(commit_unit.commit_queue.queue)
+        # print(commit_unit.commit_queue.queue)
         # Search for rs1
         entry = commit_unit.searchOperand(self.rs1_idx, self.pc)
-        print(entry)
+        # print(entry)
 
         cdb_last_result = cdb.getLastResult()
-        print(f"CDB last result: {cdb_last_result}")
+        # print(f"CDB last result: {cdb_last_result}")
 
         if (entry is not None):
             if (entry.res_ready):
-                print(f"Forwarding rs1 value {entry.res_value} to {self}")
+                # print(f"Forwarding rs1 value {entry.res_value} to {self}")
                 self.rs1_value = entry.res_value
         elif (cdb_last_result is not None and cdb_last_result["rd_idx"] == self.rs1_idx):
-            print(f"Forwarding CDB value {cdb_last_result['res_value']} to {self}")
+            # print(f"Forwarding CDB value {cdb_last_result['res_value']} to {self}")
             self.rs1_value = cdb_last_result["res_value"]
         else:
             # No in-flight instruction is computing the value, so get it from RF
-            print(f"Fetching rs1 value {rf[self.rs1_idx]} from RF {self}")
+            # print(f"Fetching rs1 value {rf[self.rs1_idx]} from RF {self}")
             self.rs1_value = rf[self.rs1_idx]
 
 
         if (arithReservationStationEntry.Rtype(self.op)):
             # R-type, search for RS2 too
-            print(commit_unit.commit_queue.queue)
+            # print(commit_unit.commit_queue.queue)
             entry = commit_unit.searchOperand(self.rs2_idx, self.pc)
-            print(entry)
+            # print(entry)
 
             if (entry is not None):
                 if (entry.res_ready):
-                    print(f"Forwarding rs2 value {entry.res_value} to {self}")
+                    # print(f"Forwarding rs2 value {entry.res_value} to {self}")
                     self.rs2_value = entry.res_value
             elif (cdb_last_result is not None and cdb_last_result["rd_idx"] == self.rs2_idx):
-                print(f"Forwarding CDB value {cdb_last_result['res_value']} to {self}")
+                # print(f"Forwarding CDB value {cdb_last_result['res_value']} to {self}")
                 self.rs2_value = cdb_last_result["res_value"]
             else:
                 # No in-flight instruction is computing the value, so get it from RF
-                print(f"Fetching rs2 value {rf[self.rs2_idx]} from RF {self}")
+                # print(f"Fetching rs2 value {rf[self.rs2_idx]} from RF {self}")
                 self.rs2_value = rf[self.rs2_idx]
 
 

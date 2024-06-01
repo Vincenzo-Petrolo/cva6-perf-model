@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from instr import Instruction
 from rf import RF
 from commit_unit import CommitUnit
+from rs_pick_policy import ReservationStationPickPolicy
 
 class ReservationStationEntry(object):
     """Resembles the Reservation Station Entry of a generic Unit of LEN5 processor."""
@@ -10,7 +11,7 @@ class ReservationStationEntry(object):
         self.instr      = None
         self.res_value  = None
         self.rob_idx    = None
-    
+
     def __str__(self):
         return f"ReservationStationEntry(pc={self.pc}, instr={self.instr}, res_value={self.res_value})"
     
@@ -76,7 +77,7 @@ class ReservationStation(ABC):
     - done: the entry is done, waiting to be committed
     """
 
-    def __init__(self, n_entries : int, entry_t : type[ReservationStationEntry]) -> None:
+    def __init__(self, n_entries : int, entry_t : type[ReservationStationEntry], pick_policy = ReservationStationPickPolicy.pickNewestReady) -> None:
         super().__init__()
         self.n_entries = n_entries
 
@@ -85,6 +86,14 @@ class ReservationStation(ABC):
 
         # List of entries
         self.entries = [{"entry": entry_t(), "status" : "clear"} for _ in range(n_entries)]
+
+        # Picking scheduling policy, it is a function
+        self.pick = pick_policy
+
+        # Attributes useful for scheduling
+        self.oldest_ptr = 0
+        self.newest_ptr = 0
+    
 
     def __str__(self):
         return f"ReservationStation(n_entries={self.n_entries}, entries={self.entries})"
@@ -99,16 +108,40 @@ class ReservationStation(ABC):
 
         Returns True if the instruction was issued, False otherwise. 
         """
-        for e in self.entries:
-            if e["status"] == "clear":
-                e["entry"] = entry
-                # Check if the entry is ready to be executed
-                if e["entry"].isReady():
-                    e["status"] = "ready"
-                else:
-                    e["status"] = "waiting_operands"
-                return True
+        i = self.newest_ptr
+
+        if self.entries[i]["status"] == "clear":
+            self.entries[i]["entry"] = entry
+
+            if entry.isReady():
+                self.entries[i]["status"] = "ready"
+            else:
+                self.entries[i]["status"] = "waiting_operands"
+
+            self.newestPtrUp()
+            return True
         return False
+        # for e in self.entries:
+        #     if e["status"] == "clear":
+        #         e["entry"] = entry
+        #         # Check if the entry is ready to be executed
+        #         if e["entry"].isReady():
+        #             e["status"] = "ready"
+        #         else:
+        #             e["status"] = "waiting_operands"
+                
+        #         # Increase the newest pointer up
+        #         self.newestPtrUp()
+        #         return True
+        # return False
+    
+    def oldestPtrUp(self):
+        """Move the oldest pointer up."""
+        self.oldest_ptr = (self.oldest_ptr + 1) % self.n_entries
+    
+    def newestPtrUp(self):
+        """Move the newest pointer up."""
+        self.newest_ptr = (self.newest_ptr + 1) % self.n_entries
     
     def getEntry(self, idx):
         """Get the entry at the index."""
@@ -119,16 +152,19 @@ class ReservationStation(ABC):
         self.entries[idx]["status"] = "clear" 
         self.entries[idx]["entry"].reset()
 
+        # Move the oldest pointer up
+        self.oldestPtrUp()
+
     def updateFromCDB(self, rd_idx, value):
         """When the CDB broadcasts a new computed value, the Reservation Station
         must update the entries that are waiting for that value."""
         for e in self.entries:
             if (e["status"] == "waiting_operands"):
                 if e["entry"].rs1_idx == rd_idx:
-                    print(f"Updating RS1 entry {e['entry']} with value {value}")
+                    # print(f"Updating RS1 entry {e['entry']} with value {value}")
                     e["entry"].rs1_value = value
                 if e["entry"].rs2_idx == rd_idx:
-                    print(f"Updating RS2 entry {e['entry']} with value {value}")
+                    # print(f"Updating RS2 entry {e['entry']} with value {value}")
                     e["entry"].rs2_value = value
                 
                 # Check if this entry is ready
@@ -137,12 +173,8 @@ class ReservationStation(ABC):
     
     def getEntryReadyForExecution(self):
         """Get the entry that is ready for execution."""
-        for e in self.entries:
-            if e["status"] == "ready":
-                e["status"] = "executing"
-                return e
-        return None
-    
+        return self.pick(self) 
+
     def updateResult(self, rob_idx):
         """Update the result of the instruction in the Reservation Station
         this is obtained after the execution of the entry."""
@@ -152,5 +184,4 @@ class ReservationStation(ABC):
                 # e["status"] = "done"
 
                 self.clearEntry(i)
-    
     

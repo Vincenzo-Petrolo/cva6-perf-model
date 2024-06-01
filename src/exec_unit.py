@@ -100,8 +100,6 @@ class ExecUnit(ABC):
             # Execute the instruction, if it is  None, then a bubble is inserted
             self.startExecution(entry)
 
-        print(self.pipeline)
-        for e in self.rs.entries:
-            print(e)
+        # print(self.pipeline)
 
         

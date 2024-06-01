@@ -101,7 +101,7 @@ class ROB():
         # Invalidate the current entry
         entry.valid = False
 
-        print(f"Clearing ROB Entry {self.head} {entry}")
+        # print(f"Clearing ROB Entry {self.head} {entry}")
         # Clear the ROB Entry
         self.entries[self.head] = ROBEntry()
 
@@ -123,7 +123,7 @@ class ROB():
     
     def updateResult(self, rd_idx: int, res_value: int, rob_idx : int) -> None:
         """Update the result of the instruction in the ROB, this comes from the CDB."""
-        print(f"Updating result for ROB Entry {rob_idx}")
+        # print(f"Updating result for ROB Entry {rob_idx}")
         entry = self.entries[rob_idx]
 
         if entry.rd_idx == rd_idx:

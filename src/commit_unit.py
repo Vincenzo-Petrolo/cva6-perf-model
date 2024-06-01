@@ -36,7 +36,7 @@ class CommitUnit( object ):
         # Step 1
         self.check_connections()
         self.cdb.step()
-        print(f"CDB: {self.cdb.buffer_o.full()}")
+        # print(f"CDB: {self.cdb.buffer_o.full()}")
         cdb_entry = self.cdb.get()
 
         print(f"Got CDB Entry: {cdb_entry}")
@@ -73,7 +73,7 @@ class CommitUnit( object ):
 
 
             # Step 5, TODO could skip this if the instr is not valid
-            print(f"Going to commit {entry.instruction} at 0x{entry.instr_pc:08X} with valid {entry.valid}")
+            # print(f"Going to commit {entry.instruction} at 0x{entry.instr_pc:08X} with valid {entry.valid}")
             self.commit_queue.put(entry)
         
         if (full):

@@ -157,8 +157,8 @@ class Dispatcher(object):
         # Issue the entry to the execution unit
         could_issue = eu.issue(entry)
 
-        if (could_issue):
-            print(f"Issuing instruction {instr} to {eu} at rob idx {instr.rob_idx}")
+        # if (could_issue):
+            # print(f"Issuing instruction {instr} to {eu} at rob idx {instr.rob_idx}")
 
         return could_issue
 
