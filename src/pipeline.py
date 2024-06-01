@@ -20,15 +20,18 @@ class Pipeline:
         return True
     
     def _hasInFlightInstruction(self):
-        for instr in self.stages:
+        """Check if there is an in-flight instruction in the pipeline.
+        An in-flight instruction is an instruction that is not in the last stage.
+        Because last stage is used as output buffer of the current unit."""
+        for instr in self.stages[:-1]:
             if instr is not None:
                 return True
         
         return False
 
     def advance(self):
-        #? This is not very efficient, but it is simple
         # Move instructions through the pipeline
+
         for i in range(self.num_stages-1, 0, -1):
             # Do not overwrite the i-th instruction
             # because if it is not None, it means it could not be
@@ -37,7 +40,6 @@ class Pipeline:
                 self.stages[i] = self.stages[i-1]
                 self.stages[i-1] = None
 
-        self.stages[0] = None
 
     def popLastInstruction(self):
         # Remove the instruction at the end of the pipeline

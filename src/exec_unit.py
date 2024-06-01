@@ -92,11 +92,11 @@ class ExecUnit(ABC):
         # Step 1
         if self.pipeline.canGetNewInstruction():
             entry = self.rs.getEntryReadyForExecution()
-            print(f"Got ready entry {entry} from RS")
 
             if (entry is None):
                 return
 
+            print(f"Got ready entry {entry} from RS with ROB idx {entry["entry"].getROBIdx()}")
             # Execute the instruction, if it is  None, then a bubble is inserted
             self.startExecution(entry)
 

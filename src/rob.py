@@ -101,6 +101,7 @@ class ROB():
         # Invalidate the current entry
         entry.valid = False
 
+        print(f"Clearing ROB Entry {self.head} {entry}")
         # Clear the ROB Entry
         self.entries[self.head] = ROBEntry()
 

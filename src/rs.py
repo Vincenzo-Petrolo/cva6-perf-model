@@ -123,19 +123,17 @@ class ReservationStation(ABC):
         """When the CDB broadcasts a new computed value, the Reservation Station
         must update the entries that are waiting for that value."""
         for e in self.entries:
-            if (e["status"] == "clear"):
-                continue
-
-            if e["entry"].rs1_idx == rd_idx:
-                print(f"Updating RS1 entry {e['entry']} with value {value}")
-                e["entry"].rs1_value = value
-            if e["entry"].rs2_idx == rd_idx:
-                print(f"Updating RS2 entry {e['entry']} with value {value}")
-                e["entry"].rs2_value = value
-            
-            # Check if this entry is ready
-            if e["entry"].isReady():
-                e["status"] = "ready"
+            if (e["status"] == "waiting_operands"):
+                if e["entry"].rs1_idx == rd_idx:
+                    print(f"Updating RS1 entry {e['entry']} with value {value}")
+                    e["entry"].rs1_value = value
+                if e["entry"].rs2_idx == rd_idx:
+                    print(f"Updating RS2 entry {e['entry']} with value {value}")
+                    e["entry"].rs2_value = value
+                
+                # Check if this entry is ready
+                if e["entry"].isReady():
+                    e["status"] = "ready"
     
     def getEntryReadyForExecution(self):
         """Get the entry that is ready for execution."""
