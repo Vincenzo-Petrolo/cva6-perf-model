@@ -35,7 +35,7 @@ class CommitUnit( object ):
         """
         # Step 1
         self.check_connections()
-
+        self.cdb.step()
         print(f"CDB: {self.cdb.buffer_o.full()}")
         cdb_entry = self.cdb.get()
 

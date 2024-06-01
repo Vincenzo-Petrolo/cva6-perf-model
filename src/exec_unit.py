@@ -101,5 +101,7 @@ class ExecUnit(ABC):
             self.startExecution(entry)
 
         print(self.pipeline)
+        for e in self.rs.entries:
+            print(e)
 
         

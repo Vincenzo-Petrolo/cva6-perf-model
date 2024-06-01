@@ -65,6 +65,9 @@ class Dispatcher(object):
         # Commit Unit
         self.commit_unit = None
 
+        # CDB
+        self.cdb = None
+
     def register(self, eu):
         """Register the execution unit to the Dispatcher."""
         Dispatcher.EUS_mapping[eu.__class__].append(eu)
@@ -83,6 +86,11 @@ class Dispatcher(object):
         """Connect the reorder buffer to the dispatcher.
         """
         self.commit_unit = commit_unit
+    
+    def connectCDB(self, cdb):
+        """Connect the common data bus to the dispatcher.
+        """
+        self.cdb = cdb
 
     
     def check(self):
@@ -93,6 +101,8 @@ class Dispatcher(object):
             raise Exception("Register File is not connected to the dispatcher.")
         if self.commit_unit is None:
             raise Exception("Commit Unit is not connected to the dispatcher.")
+        if self.cdb is None:
+            raise Exception("Common Data Bus is not connected to the dispatcher.")
         
 
     def step(self):
@@ -142,7 +152,7 @@ class Dispatcher(object):
 
         entry = entry_t.convertToEntry(instr)
 
-        entry.forwardOperands(self.rf, self.commit_unit)
+        entry.forwardOperands(self.rf, self.commit_unit, self.cdb)
 
         # Issue the entry to the execution unit
         could_issue = eu.issue(entry)

@@ -34,6 +34,14 @@ class CommonDataBus(object):
             return None
 
         return self.buffer_o.get()
+    
+    def getLastResult(self):
+        """Get the last result from the CDB without removing it.
+        """
+        if (self.buffer_o.empty()):
+            return None
+
+        return self.buffer_o.queue[0]
 
 
     def step(self):

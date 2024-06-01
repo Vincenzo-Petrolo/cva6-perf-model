@@ -34,6 +34,7 @@ class Scheduler(object):
         self.dispatcher.connectIQ(self.iq)
         self.dispatcher.connectRF(self.rf)
         self.dispatcher.connectCommitUnit(self.commit_unit)
+        self.dispatcher.connectCDB(self.cdb)
 
         # make the arithmetic unit visible for the dispatcher
         self.dispatcher.register(self.arith_unit)
@@ -50,7 +51,6 @@ class Scheduler(object):
     def step(self):
         """Run one step of the simulation loop"""
         self.commit_unit.step()
-        self.cdb.step()
         self.arith_unit.step()
         self.dispatcher.step()
 

@@ -23,6 +23,13 @@ _start:
         addi t1, t2, 20; # t1 = t2 + 20
         add t2, t1, t2
         add t0, t1, t2; # t0 = t1 + t2
+        add t0, t1, t2; # t0 = t1 + t2
+        add t0, t1, t2; # t0 = t1 + t2
+        add t0, t1, t2; # t0 = t1 + t2
+        add t0, t1, t2; # t0 = t1 + t2
+        add t0, t1, t2; # t0 = t1 + t2
+        add t0, t1, t2; # t0 = t1 + t2
+        add t0, t1, t2; # t0 = t1 + t2
 
         
         j tohost_exit # just terminate with exit code 0
