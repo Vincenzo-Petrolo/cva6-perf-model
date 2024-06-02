@@ -149,8 +149,9 @@ class ReservationStation(ABC):
     
     def clearEntry(self, idx):
         """Clear the entry at the index."""
-        self.entries[idx]["status"] = "clear" 
-        self.entries[idx]["entry"].reset()
+        for e in self.entries:
+            if e["entry"].getROBIdx() == idx:
+                e["status"] = "clear"
 
         # Move the oldest pointer up
         self.oldestPtrUp()
@@ -173,15 +174,27 @@ class ReservationStation(ABC):
     
     def getEntryReadyForExecution(self):
         """Get the entry that is ready for execution."""
-        return self.pick(self) 
+        return self.pick(self, status="ready", next_status="executing") 
+    
+    def getEntryDone(self):
+        """Return an entry that can be sent to CDB"""
+        return self.pick(self, status="done", next_status="clear") 
+    
+    def hasResultDone(self):
+        """Returns true if the reservation station has an entry, flagged as done."""
 
-    def updateResult(self, rob_idx):
+        for entry in self.entries:
+            if (entry.getResult() is not None):
+                return True
+            
+        return False
+
+    def updateResult(self, rob_idx, res_value):
         """Update the result of the instruction in the Reservation Station
         this is obtained after the execution of the entry."""
         for i, e in enumerate(self.entries):
             if e["entry"].rob_idx == rob_idx:
-                # e["entry"].setResult(res_value)
-                # e["status"] = "done"
+                e["entry"].setResult(res_value)
+                e["status"] = "done"
 
-                self.clearEntry(i)
-    
+                # self.clearEntry(i)

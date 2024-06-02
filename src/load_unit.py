@@ -40,6 +40,9 @@ class loadReservationStationEntry(ReservationStationEntry):
 
     def isReady(self):
         return self.rs1_value is not None
+    
+    def hasReadyAddress(self):
+        return self.address is not None
 
     def forwardOperands(self, rf: RF, commit_unit: CommitUnit, cdb : CommonDataBus):
         """Search in the Commit Unit first"""
@@ -71,16 +74,25 @@ class LoadUnit(MemoryUnit):
     def __init__(self, n_entries: int, latency: int = 1, iterative: bool = True) -> None:
         super().__init__(n_entries, loadReservationStationEntry, latency, iterative)
 
-        self.buffer_o = Queue(1)
+    def updateAddress(self, resultFromMemUnit : dict):
+        """Receive a dictionary with:
+            {
+                "res_value": res_value,
+                "rd_idx": rd_idx,
+                "rob_idx": entry["entry"].getROBIdx(),
+                "valid" : True
+            }
+        """
+        for e in self.rs.entries:
+            if (e.getROBIdx() == resultFromMemUnit["rob_idx"]):
+                # Update the address
+                e.address = resultFromMemUnit["res_value"]
 
-    def updateAddress(self, resultFromMemUnit):
-        raise NotImplementedError
     
     def step(self):
         """ Actions to perform:
-        1. If there is a ready result, s
-        2. Check if the memory unit has the address ready.
-        3. Step the inner memory unit which will compute the address.
+        1. Check if the memory unit has the address ready.
+        2. Step the inner memory unit which will compute the address.
         """
 
         # Step 1
@@ -97,17 +109,39 @@ class LoadUnit(MemoryUnit):
 #-------------------------------------------------------------------------------
     def hasResult(self):
         """Returns true if it has a ready result"""
-        return self.buffer_o.full()
+        return self.rs.hasResultDone()
     
     def getResult(self):
         """Returns result from the reservation station"""
-        raise self.buffer_o.get()
-    
-    def pushResult(self, resultFromMemory):
-        """Update the rd_value with a transaction from Memory"""
-        raise NotImplementedError
-    
+        return self.rs.getEntryDone()
+
 
 #-------------------------------------------------------------------------------
 # Interface with the Memory 
 #-------------------------------------------------------------------------------
+    def hasReadyAddress(self):
+        """Returns true if there is an entry with a ready address"""
+        for entry in self.rs.entries:
+            if (entry.hasReadyAddress()):
+                return True
+        
+        return False
+    
+    def getReadyMemoryTransaction(self) -> dict | None:
+        """Returns a ready read transaction to be sent to the memory unit"""
+
+        if (not self.hasReadyAddress()):
+            return None
+
+        entry = self.rs.getEntryReadyForExecution()
+
+        transaction = {
+            "entry" : entry,
+            "read" : True
+        }
+
+        return transaction
+
+    def updateResult(self, resultFromMemory : loadReservationStationEntry):
+        """Update the rd_value with a transaction from Memory"""
+        self.rs.updateResult(resultFromMemory.getROBIdx(), resultFromMemory.getResult())

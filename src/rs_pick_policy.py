@@ -1,18 +1,18 @@
 class ReservationStationPickPolicy(object):
     """Reservation Station Pick Policy."""
 
-    def pickFirstReady(rs):
+    def pickFirstReady(rs, status : str = ["ready" , "done"], next_status : str = ["executing" , "clear"]):
         """Pick the next entry ready for execution from the RS.
         Iterate in increasing order of the index, and return the first entry
         that is ready for execution.
         """
         for e in rs.entries:
-            if e["status"] == "ready":
-                e["status"] = "executing"
+            if e["status"] == status:
+                e["status"] = next_status
                 return e
         return None
     
-    def pickRandom(rs):
+    def pickRandom(rs, status : str = ["ready" , "done"], next_status : str = ["executing" , "clear"]):
         """Pick the next entry ready for execution from the RS.
         Pick a random entry that is ready for execution.
         """
@@ -21,12 +21,12 @@ class ReservationStationPickPolicy(object):
 
         random.shuffle(entries_copy)
         for e in entries_copy:
-            if e["status"] == "ready":
-                e["status"] = "executing"
+            if e["status"] == status:
+                e["status"] = next_status
                 return e
         return None
     
-    def pickLastReady(rs):
+    def pickLastReady(rs, status : str = ["ready" , "done"], next_status : str = ["executing" , "clear"]):
         """Pick the next entry ready for execution from the RS.
         Pick the oldest entry that is ready for execution.
         """
@@ -35,12 +35,12 @@ class ReservationStationPickPolicy(object):
         entries_copy.reverse()
 
         for e in entries_copy:
-            if e["status"] == "ready":
-                e["status"] = "executing"
+            if e["status"] == status:
+                e["status"] = next_status 
                 return e
         return None
     
-    def pickOldestReady(rs):
+    def pickOldestReady(rs, status : str = ["ready" , "done"], next_status : str = ["executing" , "clear"]):
         """Pick the next entry ready for execution from the RS.
         Pick the oldest entry that is ready for execution.
         """
@@ -49,8 +49,8 @@ class ReservationStationPickPolicy(object):
 
         while cnt < rs.n_entries:
 
-            if rs.entries[i]["status"] == "ready":
-                rs.entries[i]["status"] = "executing"
+            if rs.entries[i]["status"] == status:
+                rs.entries[i]["status"] = next_status 
                 return rs.entries[i]
 
             i = (i + 1) % rs.n_entries
@@ -58,7 +58,7 @@ class ReservationStationPickPolicy(object):
         
         return None
 
-    def pickNewestReady(rs):
+    def pickNewestReady(rs, status : str = ["ready" , "done"], next_status : str = ["executing" , "clear"]):
         """Pick the next entry ready for execution from the RS.
         Pick the oldest entry that is ready for execution.
         """
@@ -66,8 +66,8 @@ class ReservationStationPickPolicy(object):
         cnt = 0
 
         while cnt < rs.n_entries:
-            if rs.entries[i]["status"] == "ready":
-                rs.entries[i]["status"] = "executing"
+            if rs.entries[i]["status"] == status:
+                rs.entries[i]["status"] = next_status 
                 return rs.entries[i]
 
             i = (i - 1) % rs.n_entries
