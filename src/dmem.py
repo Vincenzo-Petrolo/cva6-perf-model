@@ -1,7 +1,6 @@
 import random   # Used for choosing wether it is a cache hit or miss
 from load_unit import loadReservationStationEntry
-
-#todo import the store unit reservation station entry
+from store_unit import storeReservationStationEntry
 
 class DataMemory(object):
     """Data Memory of LEN5 processor."""
@@ -28,7 +27,7 @@ class DataMemory(object):
         """It stores a dictionary with the latest transaction."""
         self.curr_txn = None
     
-    def advance(self):
+    def step(self):
         """Advance the transaction counter."""
 
         if (self.txn_counter is None or self.txn_counter == 0):
@@ -41,9 +40,8 @@ class DataMemory(object):
             # Perform the operation of the transaction
             if (type(self.curr_txn) == loadReservationStationEntry):
                 self.curr_txn.setResult(self.read(self.curr_txn.address))
-            #todo enable this
-            # elif (type(self.curr_txn) == storeReservationStationEntry):
-                # self.write(self.curr_txn.address, self.curr_txn.value)
+            elif (type(self.curr_txn) == storeReservationStationEntry):
+                self.write(self.curr_txn.address, self.curr_txn.value)
             else:
                 raise Exception("Invalid transaction type")
 
@@ -78,7 +76,7 @@ class DataMemory(object):
         """Returns True if a transaction can be started."""
         return self.txn_counter is None
 
-    def startTransaction(self, txn : loadReservationStationEntry): #todo add storeReservationStationEntry type
+    def startTransaction(self, txn : loadReservationStationEntry | storeReservationStationEntry):
         """Start a transaction."""
         self.curr_txn = txn
         # If the random number between 0 and 1 is less than the cache hit rate, then we have a hit, else a miss
