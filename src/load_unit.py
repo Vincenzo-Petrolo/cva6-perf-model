@@ -71,8 +71,8 @@ class loadReservationStationEntry(ReservationStationEntry):
 
 class LoadUnit(MemoryUnit):
     """Load Unit class, inherits from Memory Unit."""
-    def __init__(self, n_entries: int, latency: int = 1, iterative: bool = True) -> None:
-        super().__init__(n_entries, loadReservationStationEntry, latency, iterative)
+    def __init__(self, n_entries: int) -> None:
+        super().__init__(n_entries, loadReservationStationEntry, latency=1, iterative=True)
 
     def updateAddress(self, resultFromMemUnit : dict):
         """Receive a dictionary with:
@@ -136,8 +136,7 @@ class LoadUnit(MemoryUnit):
         entry = self.rs.getEntryReadyForExecution()
 
         transaction = {
-            "entry" : entry,
-            "read" : True
+            "entry" : entry
         }
 
         return transaction
