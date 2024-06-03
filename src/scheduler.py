@@ -70,8 +70,6 @@ class Scheduler(object):
         """Run one step of the simulation loop"""
         self.commit_unit.step()
         self.arith_unit.step()
-        print(self.branch_unit.rs.entries)
-        print(self.branch_unit.pipeline)
         self.branch_unit.step()
         self.load_store_unit.step()
         self.dispatcher.step()

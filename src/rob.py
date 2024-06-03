@@ -1,19 +1,5 @@
 from instr import Instruction
 
-#   typedef struct packed {
-#     instr_t instruction;  // the instruction
-#     logic [XLEN-1:0] instr_pc;  // the program counter of the instruction
-#     logic res_ready;  // the result of the instruction is ready
-#     logic [XLEN-1:0] res_value;  // the value of the result (from the EU)
-#     logic [REG_IDX_LEN-1:0] rd_idx;  // the destination register (rd)
-#     logic rd_upd;  // update the destination register (rd)
-#     logic mem_crit;  // memory accesses shall wait for this instruction to complete
-#     logic order_crit;  // no out-of-order commit allowed
-#     logic except_raised;  // an exception has been raised
-#     except_code_t except_code;  // the exception code
-#     logic mem_clear;  // clear to commit to memory out of order (stores only)
-#   } rob_entry_t;
-
 class ROBEntry():
     def __init__(self) -> None:
         self.instruction = None
@@ -30,7 +16,8 @@ class ROBEntry():
         self.valid = False
 
     def __str__(self):
-        return f"ROBEntry(instruction={self.instruction}, instr_pc={self.instr_pc}, res_ready={self.res_ready}, res_value={self.res_value}, rd_idx={self.rd_idx}, valid={self.valid})"
+        instr_pc = self.instr_pc if self.instr_pc is not None else 0
+        return f"ROBEntry(instruction={self.instruction}, instr_pc=0x{instr_pc :02x}, res_ready={self.res_ready}, res_value={self.res_value}, rd_idx={self.rd_idx}, valid={self.valid})"
 
     def __repr__(self):
         return self.__str__()
@@ -106,7 +93,6 @@ class ROB():
         # Invalidate the current entry
         entry.valid = False
 
-        # print(f"Clearing ROB Entry {self.head} {entry}")
         # Clear the ROB Entry
         self.entries[self.head] = ROBEntry()
 

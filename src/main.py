@@ -16,7 +16,7 @@ def main():
 
     i = 0
 
-    while i < 100: # Just for debugging
+    while i < 250: # Just for debugging
         print(f"Step {i}")
         scheduler.step()
 
