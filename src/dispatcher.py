@@ -133,9 +133,13 @@ class Dispatcher(object):
                 # Continue to the next entry
                 continue
 
+            if (instr.getBase() == 'AUIPC' or instr.getBase() == 'LUI'):
+                # If it is AUIPC or LUI, then we can issue it immediately
+                self.buffer_o.pop_at(i)
+                continue
+
             # See which execution unit can handle this instruction
             eus = Dispatcher.EUS_mapping[Dispatcher.rules[instr.getBase()]]
-
             if (len(eus) == 0):
                 raise Exception(f"No execution unit can accept this instruction {instr}")
             
@@ -172,6 +176,16 @@ class Dispatcher(object):
         instr = self.iq.get()
 
         rob_idx = self.commit_unit.rob.push(instr)
+
+        if (instr.getBase() == 'AUIPC'):
+            # Update the ROB entry with the immediate value
+            self.commit_unit.rob.entries[rob_idx].res_ready = True
+            self.commit_unit.rob.entries[rob_idx].res_value = instr.fields().imm + instr.address
+
+        elif (instr.getBase() == 'LUI'):
+            # Update the ROB entry with the immediate value
+            self.commit_unit.rob.entries[rob_idx].res_ready = True
+            self.commit_unit.rob.entries[rob_idx].res_value = instr.fields().imm
 
         # Update the rob index of the issued instructions
         instr.rob_idx = rob_idx
