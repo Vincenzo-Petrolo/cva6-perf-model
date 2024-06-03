@@ -60,7 +60,7 @@ class CommonDataBus(object):
         # Step 2
         for eu in self.EUS:
             # Step 3
-            if eu.hasResult():
+            if eu.hasResult() or eu.hasDoneInReservationStation():
                 # Step 4
                 result = eu.getResult()
                 # print(f"CDB Step, getting {result} from {eu}")

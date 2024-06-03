@@ -6,6 +6,7 @@ from commit_unit    import CommitUnit
 from rf             import RF
 from lsu            import LoadStoreUnit
 from dmem           import DataMemory
+from branch_unit    import BranchUnit
 
 
 
@@ -24,6 +25,8 @@ class Scheduler(object):
         self.arith_unit = ArithUnit(8, 1, True)
 
         self.load_store_unit = LoadStoreUnit()
+
+        self.branch_unit = BranchUnit(8, 1, True)
 
         self.dmem = DataMemory()
 
@@ -46,6 +49,7 @@ class Scheduler(object):
         self.dispatcher.register(self.arith_unit)
         self.dispatcher.register(self.load_store_unit.load_unit)
         self.dispatcher.register(self.load_store_unit.store_unit)
+        self.dispatcher.register(self.branch_unit)
 
         # Connect the LSU to the memory
         self.load_store_unit.connectMemory(self.dmem)
@@ -54,6 +58,7 @@ class Scheduler(object):
         self.cdb.register(self.arith_unit)
         self.cdb.register(self.load_store_unit.load_unit)
         self.cdb.register(self.load_store_unit.store_unit)
+        self.cdb.register(self.branch_unit)
 
         # connect the commit unit to the CDB to update ROB entries,
         # to the RF to write and to the dispatcher to allocate new instructions
@@ -65,6 +70,9 @@ class Scheduler(object):
         """Run one step of the simulation loop"""
         self.commit_unit.step()
         self.arith_unit.step()
+        print(self.branch_unit.rs.entries)
+        print(self.branch_unit.pipeline)
+        self.branch_unit.step()
         self.load_store_unit.step()
         self.dispatcher.step()
 

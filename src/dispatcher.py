@@ -5,6 +5,7 @@ from instr import Instruction
 from rs import ReservationStationEntry
 from load_unit import LoadUnit
 from store_unit import StoreUnit
+from branch_unit import BranchUnit
 import isa
 
 
@@ -27,6 +28,9 @@ class Dispatcher(object):
         'OP'                            : ArithUnit,
         'LOAD'                          : LoadUnit,
         'STORE'                         : StoreUnit,
+        'JAL'                           : BranchUnit,
+        'JALR'                          : BranchUnit,
+        'BRANCH'                        : BranchUnit,
     }
 
     """
@@ -36,6 +40,7 @@ class Dispatcher(object):
         ArithUnit : [],
         LoadUnit : [],
         StoreUnit : [],
+        BranchUnit : []
     }
 
     """ 

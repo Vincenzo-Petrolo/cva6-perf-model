@@ -51,6 +51,9 @@ class ExecUnit(ABC):
     def hasResult(self):
         """Directly access the last stage of the pipeline."""
         return self.pipeline.getLastInstruction() is not None
+    
+    def hasDoneInReservationStation(self):
+        return self.rs.hasResultDone()
 
     
     def getResult(self):
@@ -62,9 +65,9 @@ class ExecUnit(ABC):
         if (entry is not None):
             # Return a previous entry
             return {
-                "res_value": entry.getResult(),
-                "rd_idx": entry["rd_idx"],
-                "rob_idx": entry.getROBIdx(),
+                "res_value": entry["entry"].getResult(),
+                "rd_idx": entry["entry"].rd_idx,
+                "rob_idx": entry["entry"].getROBIdx(),
                 "valid" : True
             }
 
