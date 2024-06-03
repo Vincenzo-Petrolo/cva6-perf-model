@@ -90,7 +90,7 @@ class LoadUnit(MemoryUnit):
             }
         """
         for e in self.rs.entries:
-            if (e["entry"].getROBIdx() == resultFromMemUnit["rob_idx"]):
+            if (e["entry"].getROBIdx() == resultFromMemUnit["rob_idx"] and e["status"] == "executing"):
                 # Update the address
                 e["entry"].address = resultFromMemUnit["res_value"]
                 e["status"] = "address_ready"
@@ -147,7 +147,13 @@ class LoadUnit(MemoryUnit):
         return False
 
     def getEntryWithAddressReady(self):
-        return ReservationStationPickPolicy.pickOldestReady(self.rs, status="address_ready", next_status="address_ready")
+        return ReservationStationPickPolicy.pickOldestReady(self.rs, status="address_ready", next_status="executing")
+    
+    def restoreAddressReady(self, entry):
+        for e in self.rs.entries:
+            if (e["entry"].getROBIdx() == entry.getROBIdx()) and (e["status"] == "executing"):
+                e["status"] = "address_ready"
+                break
     
     def getReadyMemoryTransaction(self) -> loadReservationStationEntry:
         """Returns a ready read transaction to be sent to the memory unit"""

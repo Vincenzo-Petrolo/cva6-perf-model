@@ -1,7 +1,7 @@
 class ReservationStationPickPolicy(object):
     """Reservation Station Pick Policy."""
 
-    def pickFirstReady(rs, status : str = ["ready" , "done"], next_status : str = ["executing" , "clear"]):
+    def pickFirstReady(rs, status : str, next_status : str):
         """Pick the next entry ready for execution from the RS.
         Iterate in increasing order of the index, and return the first entry
         that is ready for execution.
@@ -12,7 +12,7 @@ class ReservationStationPickPolicy(object):
                 return e
         return None
     
-    def pickRandom(rs, status : str = ["ready" , "done"], next_status : str = ["executing" , "clear"]):
+    def pickRandom(rs, status : str, next_status : str):
         """Pick the next entry ready for execution from the RS.
         Pick a random entry that is ready for execution.
         """
@@ -26,7 +26,7 @@ class ReservationStationPickPolicy(object):
                 return e
         return None
     
-    def pickLastReady(rs, status : str = ["ready" , "done"], next_status : str = ["executing" , "clear"]):
+    def pickLastReady(rs, status : str, next_status : str):
         """Pick the next entry ready for execution from the RS.
         Pick the oldest entry that is ready for execution.
         """
@@ -40,7 +40,7 @@ class ReservationStationPickPolicy(object):
                 return e
         return None
     
-    def pickOldestReady(rs, status : str = ["ready" , "done"], next_status : str = ["executing" , "clear"]):
+    def pickOldestReady(rs, status : str, next_status : str):
         """Pick the next entry ready for execution from the RS.
         Pick the oldest entry that is ready for execution.
         """
@@ -58,7 +58,7 @@ class ReservationStationPickPolicy(object):
         
         return None
 
-    def pickNewestReady(rs, status : str = ["ready" , "done"], next_status : str = ["executing" , "clear"]):
+    def pickNewestReady(rs, status : str, next_status : str):
         """Pick the next entry ready for execution from the RS.
         Pick the oldest entry that is ready for execution.
         """

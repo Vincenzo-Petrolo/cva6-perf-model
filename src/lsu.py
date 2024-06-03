@@ -109,6 +109,7 @@ class LoadStoreUnit(object):
             # Check for speculative load hazard
             if (self.speculativeLoadHazardCheck(txn)):
                 print("Speculative Load Hazard Detected")
+                self.load_unit.restoreAddressReady(txn)
                 txn = None
 
         # if no load transaction can be issued, then check the store unit
