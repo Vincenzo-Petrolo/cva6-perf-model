@@ -121,6 +121,15 @@ class arithReservationStationEntry(ReservationStationEntry):
                 # No in-flight instruction is computing the value, so get it from RF
                 # print(f"Fetching rs2 value {rf[self.rs2_idx]} from RF {self}")
                 self.rs2_value = rf[self.rs2_idx]
+    
+    def updateFromCDB(self, rd_idx, value):
+        """Check if can update entry with the value from the CDB."""
+        if (self.rs1_idx == rd_idx):
+            self.rs1_value = value
+
+        if (arithReservationStationEntry.Rtype(self.op)):
+            if (self.rs2_idx == rd_idx):
+                self.rs2_value = value
 
 
         

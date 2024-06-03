@@ -489,6 +489,9 @@ class Instr:
     
     def getType(self):
         return Instr.type_of_base[self.base()]
+    
+    def getBase(self):
+        return self.base()
 
     def fields(self):
         """Get an object with the fields of the instruction"""

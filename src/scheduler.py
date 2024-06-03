@@ -4,6 +4,8 @@ from arith_unit     import ArithUnit
 from cdb            import CommonDataBus
 from commit_unit    import CommitUnit
 from rf             import RF
+from lsu            import LoadStoreUnit
+from dmem           import DataMemory
 
 
 
@@ -20,6 +22,10 @@ class Scheduler(object):
         self.dispatcher = Dispatcher()
 
         self.arith_unit = ArithUnit(8, 1, True)
+
+        self.load_store_unit = LoadStoreUnit()
+
+        self.dmem = DataMemory()
 
         self.cdb = CommonDataBus()
 
@@ -38,9 +44,15 @@ class Scheduler(object):
 
         # make the arithmetic unit visible for the dispatcher
         self.dispatcher.register(self.arith_unit)
+        self.dispatcher.register(self.load_store_unit.load_unit)
+        self.dispatcher.register(self.load_store_unit.store_unit)
+
+        # Connect the LSU to the memory
+        self.load_store_unit.connectMemory(self.dmem)
 
         # make the arithmetic unit visible for the CDB
         self.cdb.register(self.arith_unit)
+        self.cdb.register(self.load_store_unit.load_unit)
 
         # connect the commit unit to the CDB to update ROB entries,
         # to the RF to write and to the dispatcher to allocate new instructions
@@ -52,6 +64,7 @@ class Scheduler(object):
         """Run one step of the simulation loop"""
         self.commit_unit.step()
         self.arith_unit.step()
+        self.load_store_unit.step()
         self.dispatcher.step()
 
         print(self.commit_unit.rob)

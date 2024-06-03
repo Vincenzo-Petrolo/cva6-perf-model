@@ -13,4 +13,4 @@ class MemoryUnit(ExecUnit):
     
     def execute(self, entry: ReservationStationEntry):
         """Compute the address and return it."""
-        return entry.address + entry.offset
+        return entry.rs1_value + entry.offset

@@ -15,18 +15,13 @@ fromhost: .dword 0
 .globl _start
 
 _start:
-        addi t2, t1, 10; # t0 = t1 + 10
-        addi t1, t2, 20; # t1 = t2 + 20
-        add t2, t1, t2
-        add t0, t1, t2; # t0 = t1 + t2
-        add t0, t1, t2; # t0 = t1 + t2
-        add t0, t1, t2; # t0 = t1 + t2
-        add t0, t1, t2; # t0 = t1 + t2
-        add t0, t1, t2; # t0 = t1 + t2
-        add t0, t1, t2; # t0 = t1 + t2
-        add t0, t1, t2; # t0 = t1 + t2
-        add t0, t1, t2; # t0 = t1 + t2
-
+        addi sp, sp, -16
+        add t0, t1, t2
+        lw t0, 0(sp)
+        lw t1, 4(sp)
+        lw t2, 8(sp)
+        lw t3, 12(sp)
+        addi sp, sp, 16
         
         j tohost_exit # just terminate with exit code 0
 

@@ -66,6 +66,11 @@ class ReservationStationEntry(object):
         """Then fetch from the RF"""
         pass
 
+    @abstractmethod
+    def updateFromCDB(self, rd_idx, value):
+        """Update the entry with forwarded values from the Common Data Bus."""
+        pass
+
 
 class ReservationStation(ABC):
     """Generic Reservation Station of LEN5 processor."""
@@ -161,12 +166,7 @@ class ReservationStation(ABC):
         must update the entries that are waiting for that value."""
         for e in self.entries:
             if (e["status"] == "waiting_operands"):
-                if e["entry"].rs1_idx == rd_idx:
-                    # print(f"Updating RS1 entry {e['entry']} with value {value}")
-                    e["entry"].rs1_value = value
-                if e["entry"].rs2_idx == rd_idx:
-                    # print(f"Updating RS2 entry {e['entry']} with value {value}")
-                    e["entry"].rs2_value = value
+                e["entry"].updateFromCDB(rd_idx, value)
                 
                 # Check if this entry is ready
                 if e["entry"].isReady():
@@ -184,7 +184,7 @@ class ReservationStation(ABC):
         """Returns true if the reservation station has an entry, flagged as done."""
 
         for entry in self.entries:
-            if (entry.getResult() is not None):
+            if (entry["status"] == "done"):
                 return True
             
         return False

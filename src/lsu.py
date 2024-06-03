@@ -3,6 +3,8 @@ from store_unit import StoreUnit
 
 class LoadStoreUnit(object):
     """Resembles the Load Store Unit of LEN5 processor."""
+    #todo miss support for LB, LH, LD, SB, SH, SD, do I really need this?
+
     def __init__(self) -> None:
 
         # Create the Load Unit
@@ -66,48 +68,48 @@ class LoadStoreUnit(object):
 #-------------------------------------------------------------------------------
 # Store-to-Load Forwarding
 #-------------------------------------------------------------------------------
-def storeToLoadForwarding(self):
-    """Forward the store results to the load unit."""
-    #todo, check if this works
+    def storeToLoadForwarding(self):
+        """Forward the store results to the load unit."""
+        #todo, check if this works
 
-    for s_entry in self.store_unit.rs.entries:
-        if (s_entry["status"] == "done"):
-            for l_entry in self.load_unit.rs.entries:
-                if (l_entry["status"] == "waiting_operands"):
-                    if (l_entry["entry"].address == s_entry["entry"].address):
-                        l_entry["entry"].res_value = s_entry["entry"].res_value
+        for s_entry in self.store_unit.rs.entries:
+            if (s_entry["status"] == "done"):
+                for l_entry in self.load_unit.rs.entries:
+                    if (l_entry["status"] == "waiting_operands"):
+                        if (l_entry["entry"].address == s_entry["entry"].address):
+                            l_entry["entry"].res_value = s_entry["entry"].res_value
 
-                        # Flag the load entry as ready
-                        l_entry["status"] = "ready"
+                            # Flag the load entry as ready
+                            l_entry["status"] = "ready"
 
 #-------------------------------------------------------------------------------
 # Speculative Load hazard check
 #-------------------------------------------------------------------------------
-def speculativeLoadHazardCheck(self, txn):
-    """Check if there is a speculative load hazard."""
+    def speculativeLoadHazardCheck(self, txn):
+        """Check if there is a speculative load hazard."""
 
-    for entry in self.store_unit.rs.entries:
-        if (entry["status"] != "clear"):
-            if (entry["entry"].address == txn["address"]):
-                return True
-    
-    return False
+        for entry in self.store_unit.rs.entries:
+            if (entry["status"] != "clear"):
+                if (entry["entry"].address == txn["address"]):
+                    return True
+        
+        return False
 
-def getStartableTransactions(self):
-    """Get the startable transactions from either Load or Store Unit.
-    Load unit is given priority over the Store Unit."""
+    def getStartableTransactions(self):
+        """Get the startable transactions from either Load or Store Unit.
+        Load unit is given priority over the Store Unit."""
 
-    txn = None
+        txn = None
 
-    # Check the Load Unit
-    if (self.load_unit.hasReadyAddress()):
-        txn = self.load_unit.getReadyMemoryTransaction()
-        # Check for speculative load hazard
-        if (self.speculativeLoadHazardCheck(txn)):
-            txn = None
+        # Check the Load Unit
+        if (self.load_unit.hasReadyAddress()):
+            txn = self.load_unit.getReadyMemoryTransaction()
+            # Check for speculative load hazard
+            if (self.speculativeLoadHazardCheck(txn)):
+                txn = None
 
-    # if no load transaction can be issued, then check the store unit
-    if (txn is None and self.store_unit.hasReadyAddress()):
-        txn = self.store_unit.getReadyMemoryTransaction()
+        # if no load transaction can be issued, then check the store unit
+        if (txn is None and self.store_unit.hasReadyAddress()):
+            txn = self.store_unit.getReadyMemoryTransaction()
 
-    return txn
+        return txn

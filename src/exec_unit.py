@@ -56,20 +56,17 @@ class ExecUnit(ABC):
     def getResult(self):
         """Pop the result from the last stage of the pipeline."""
         
-        # If the pipeline has no new results
-        if (self.hasResult() == False):
-            # Search for done entries in the RS
-            entry = self.rs.getEntryDone()
-            if (entry is None):
-                return None
-            else:
-                # Return a previous entry
-                return {
-                    "res_value": entry.getResult(),
-                    "rd_idx": entry["rd_idx"],
-                    "rob_idx": entry.getROBIdx(),
-                    "valid" : True
-                }
+        # Search for done entries in the RS
+        entry = self.rs.getEntryDone()
+
+        if (entry is not None):
+            # Return a previous entry
+            return {
+                "res_value": entry.getResult(),
+                "rd_idx": entry["rd_idx"],
+                "rob_idx": entry.getROBIdx(),
+                "valid" : True
+            }
 
 
         # If the pipeline has a fresh result, then don't store in the RS
@@ -104,7 +101,7 @@ class ExecUnit(ABC):
         2. Issue an instruction if pipeline is not stalled.
         """
 
-        if (self.hasResult()):
+        if (self.pipeline.getLastInstruction() is not None):
             # Update the reservation station with the result
             #todo check for correctness of this new feature
             result = self.pipeline.popLastInstruction()

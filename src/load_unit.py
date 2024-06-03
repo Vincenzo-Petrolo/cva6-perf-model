@@ -4,6 +4,7 @@ from cdb import CommonDataBus
 from commit_unit import CommitUnit
 from mem_unit import MemoryUnit
 from queue import Queue
+from rs_pick_policy import ReservationStationPickPolicy
 
 import instr
 
@@ -34,7 +35,7 @@ class loadReservationStationEntry(ReservationStationEntry):
         # Set common operands in R/I instr
         entry.rd_idx = instr.fields().rd
         entry.rs1_idx = instr.fields().rs1
-        entry.offset = instr.fields().offset
+        entry.offset = instr.fields().imm
 
         return entry
 
@@ -68,6 +69,11 @@ class loadReservationStationEntry(ReservationStationEntry):
             # No in-flight instruction is computing the value, so get it from RF
             # print(f"Fetching rs1 value {rf[self.rs1_idx]} from RF {self}")
             self.rs1_value = rf[self.rs1_idx]
+    
+    def updateFromCDB(self, rd_idx, value):
+        """Update the entry with the value from the CDB."""
+        if (rd_idx == self.rs1_idx):
+            self.rs1_value = value
 
 class LoadUnit(MemoryUnit):
     """Load Unit class, inherits from Memory Unit."""
@@ -84,9 +90,11 @@ class LoadUnit(MemoryUnit):
             }
         """
         for e in self.rs.entries:
-            if (e.getROBIdx() == resultFromMemUnit["rob_idx"]):
+            if (e["entry"].getROBIdx() == resultFromMemUnit["rob_idx"]):
+                print(f"Updating address for {e['entry']} with {resultFromMemUnit['res_value']}")
                 # Update the address
-                e.address = resultFromMemUnit["res_value"]
+                e["entry"].address = resultFromMemUnit["res_value"]
+                e["status"] = "address_ready"
 
     
     def step(self):
@@ -98,7 +106,7 @@ class LoadUnit(MemoryUnit):
         # Step 1
         if (super().hasResult()):
             # Update the reservation station with the address
-            self.updateAddress(super().getResult())
+            self.updateAddress(self.pipeline.popLastInstruction())
 
         # Step 2
         super().step()
@@ -113,7 +121,17 @@ class LoadUnit(MemoryUnit):
     
     def getResult(self):
         """Returns result from the reservation station"""
-        return self.rs.getEntryDone()
+        entry = self.rs.getEntryDone()
+
+        if (entry is None):
+            return None
+
+        return {
+            "res_value" : entry["entry"].res_value,
+            "rd_idx"    : entry["entry"].rd_idx,
+            "rob_idx"   : entry["entry"].getROBIdx(),
+            "valid"     : True
+        }
 
 
 #-------------------------------------------------------------------------------
@@ -122,10 +140,13 @@ class LoadUnit(MemoryUnit):
     def hasReadyAddress(self):
         """Returns true if there is an entry with a ready address"""
         for entry in self.rs.entries:
-            if (entry.hasReadyAddress()):
+            if (entry["status"] == "address_ready"):
                 return True
         
         return False
+
+    def getEntryWithAddressReady(self):
+        return ReservationStationPickPolicy.pickOldestReady(self.rs, status="address_ready", next_status="executing")
     
     def getReadyMemoryTransaction(self) -> dict | None:
         """Returns a ready read transaction to be sent to the memory unit"""
@@ -133,11 +154,9 @@ class LoadUnit(MemoryUnit):
         if (not self.hasReadyAddress()):
             return None
 
-        entry = self.rs.getEntryReadyForExecution()
+        entry = self.getEntryWithAddressReady()
 
-        transaction = {
-            "entry" : entry
-        }
+        transaction = entry["entry"]
 
         return transaction
 

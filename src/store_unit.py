@@ -138,7 +138,7 @@ class StoreUnit(MemoryUnit):
     def hasReadyAddress(self):
         """Returns true if there is an entry with a ready address"""
         for entry in self.rs.entries:
-            if (entry.hasReadyAddress()):
+            if (entry["entry"].hasReadyAddress()):
                 return True
         
         return False
@@ -151,9 +151,7 @@ class StoreUnit(MemoryUnit):
         if (entry["entry"].address is None):
             return None
 
-        transaction = {
-            "entry" : entry
-        }
+        transaction = entry["entry"]
 
         return transaction
 

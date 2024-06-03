@@ -3,6 +3,8 @@ from exec_unit import ExecUnit
 from customQueue import CustomQueue
 from instr import Instruction
 from rs import ReservationStationEntry
+from load_unit import LoadUnit
+from store_unit import StoreUnit
 import isa
 
 
@@ -21,16 +23,19 @@ class Dispatcher(object):
         #############################################
         # Instr Type                    : Exec Unit # 
         #############################################
-        isa.Itype                       : ArithUnit,
-        isa.Rtype                       : ArithUnit,
-
+        'OP-IMM'                        : ArithUnit,
+        'OP'                            : ArithUnit,
+        'LOAD'                          : LoadUnit,
+        'STORE'                         : StoreUnit,
     }
 
     """
      Map a class to the available ExecUnits for that class.
     """
     EUS_mapping = {
-        ArithUnit : []
+        ArithUnit : [],
+        LoadUnit : [],
+        StoreUnit : [],
     }
 
     """ 
@@ -129,7 +134,7 @@ class Dispatcher(object):
                 continue
 
             # See which execution unit can handle this instruction
-            eus = Dispatcher.EUS_mapping[Dispatcher.rules[instr.getType()]]
+            eus = Dispatcher.EUS_mapping[Dispatcher.rules[instr.getBase()]]
 
             if (len(eus) == 0):
                 raise Exception(f"No execution unit can accept this instruction {instr}")

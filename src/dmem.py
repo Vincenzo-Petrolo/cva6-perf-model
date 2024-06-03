@@ -21,7 +21,7 @@ class DataMemory(object):
         # Curr transaction counter
         """It is used to keep track of when the current transaction will be done.
         It is a downcounter, when it reaches 0, the transaction is done."""
-        self.txn_counter = 0
+        self.txn_counter = None
 
         # Current transaction
         """It stores a dictionary with the latest transaction."""
