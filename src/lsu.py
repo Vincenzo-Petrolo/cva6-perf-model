@@ -1,5 +1,5 @@
-from load_unit import LoadUnit
-from store_unit import StoreUnit
+from load_unit import LoadUnit, loadReservationStationEntry
+from store_unit import StoreUnit, storeReservationStationEntry
 
 class LoadStoreUnit(object):
     """Resembles the Load Store Unit of LEN5 processor."""
@@ -36,7 +36,8 @@ class LoadStoreUnit(object):
         # Step 1
         if (self.mem.hasReadyTransaction()):
             txn = self.mem.getReadyTransaction()
-            self.load_unit.updateResult(txn)
+            if (type(txn) == loadReservationStationEntry):
+                self.load_unit.updateResult(txn)
         
         # Step 2
         if (self.mem.canStartTransaction()):
@@ -104,12 +105,15 @@ class LoadStoreUnit(object):
         # Check the Load Unit
         if (self.load_unit.hasReadyAddress()):
             txn = self.load_unit.getReadyMemoryTransaction()
+            print("Load Unit has ready memory transaction")
             # Check for speculative load hazard
             if (self.speculativeLoadHazardCheck(txn)):
+                print("Speculative Load Hazard Detected")
                 txn = None
 
         # if no load transaction can be issued, then check the store unit
         if (txn is None and self.store_unit.hasReadyAddress()):
+            print("Store Unit has ready memory transaction")
             txn = self.store_unit.getReadyMemoryTransaction()
 
         return txn

@@ -170,7 +170,7 @@ class StoreUnit(MemoryUnit):
     def getEntryWithAddressReady(self):
         return ReservationStationPickPolicy.pickOldestReady(self.rs, status="address_ready", next_status="executing")
     
-    def getReadyMemoryTransaction(self) -> dict | None:
+    def getReadyMemoryTransaction(self) -> storeReservationStationEntry:
         """Returns a ready read transaction to be sent to the memory unit"""
 
         if (not self.hasReadyAddress()):

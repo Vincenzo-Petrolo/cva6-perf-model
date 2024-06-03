@@ -15,14 +15,14 @@ fromhost: .dword 0
 .globl _start
 
 _start:
-        addi sp, sp, -16
-        add t0, t1, t2
-        lw t0, 0(sp)
-        add t1, t0, t2
-        lw t1, 4(sp)
-        lw t2, 8(sp)
-        lw t3, 12(sp)
-        addi sp, sp, 16
+        addi sp, sp, -4
+
+        addi t0, t1, 10
+        sw t0, 0(sp)
+        lw t1, 0(sp)
+        add t2, t0, t1
+
+        addi sp, sp, 4
         
         j tohost_exit # just terminate with exit code 0
 

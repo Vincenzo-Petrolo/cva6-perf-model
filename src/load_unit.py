@@ -91,10 +91,10 @@ class LoadUnit(MemoryUnit):
         """
         for e in self.rs.entries:
             if (e["entry"].getROBIdx() == resultFromMemUnit["rob_idx"]):
-                print(f"Updating address for {e['entry']} with {resultFromMemUnit['res_value']}")
                 # Update the address
                 e["entry"].address = resultFromMemUnit["res_value"]
                 e["status"] = "address_ready"
+                print(f"Updated address for {e['entry']} status {e['status']}")
 
     
     def step(self):
@@ -103,6 +103,7 @@ class LoadUnit(MemoryUnit):
         2. Step the inner memory unit which will compute the address.
         """
 
+        print(self.rs.entries)
         # Step 1
         if (super().hasResult()):
             # Update the reservation station with the address
@@ -146,9 +147,9 @@ class LoadUnit(MemoryUnit):
         return False
 
     def getEntryWithAddressReady(self):
-        return ReservationStationPickPolicy.pickOldestReady(self.rs, status="address_ready", next_status="executing")
+        return ReservationStationPickPolicy.pickOldestReady(self.rs, status="address_ready", next_status="address_ready")
     
-    def getReadyMemoryTransaction(self) -> dict | None:
+    def getReadyMemoryTransaction(self) -> loadReservationStationEntry:
         """Returns a ready read transaction to be sent to the memory unit"""
 
         if (not self.hasReadyAddress()):

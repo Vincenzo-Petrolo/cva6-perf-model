@@ -26,7 +26,7 @@ class DataMemory(object):
         # Current transaction
         """It stores a dictionary with the latest transaction."""
         self.curr_txn = None
-    
+
     def step(self):
         """Advance the transaction counter."""
 
