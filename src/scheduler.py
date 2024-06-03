@@ -53,6 +53,7 @@ class Scheduler(object):
         # make the arithmetic unit visible for the CDB
         self.cdb.register(self.arith_unit)
         self.cdb.register(self.load_store_unit.load_unit)
+        self.cdb.register(self.load_store_unit.store_unit)
 
         # connect the commit unit to the CDB to update ROB entries,
         # to the RF to write and to the dispatcher to allocate new instructions

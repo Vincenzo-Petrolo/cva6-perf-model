@@ -4,6 +4,7 @@ from cdb import CommonDataBus
 from commit_unit import CommitUnit
 from mem_unit import MemoryUnit
 from queue import Queue
+from rs_pick_policy import ReservationStationPickPolicy
 
 import instr
 
@@ -17,6 +18,7 @@ class storeReservationStationEntry(ReservationStationEntry):
         self.rs2_value  = None
         self.offset     = None
         self.address    = None
+        self.rd_idx     = None
 
 
     def __str__(self):
@@ -34,8 +36,8 @@ class storeReservationStationEntry(ReservationStationEntry):
         entry.setROBIdx(instr.rob_idx)
         # Set common operands in R/I instr
         entry.rs1_idx = instr.fields().rs1
-        entry.rs1_idx = instr.fields().rs2
-        entry.offset = instr.fields().offset
+        entry.rs2_idx = instr.fields().rs2
+        entry.offset = instr.fields().imm
 
         return entry
 
@@ -85,6 +87,13 @@ class storeReservationStationEntry(ReservationStationEntry):
             # print(f"Fetching rs2 value {rf[self.rs2_idx]} from RF {self}")
             self.rs2_value = rf[self.rs2_idx]
 
+    def updateFromCDB(self, rd_idx, value):
+        """Update the entry with the value from the CDB."""
+        if (rd_idx == self.rs1_idx):
+            self.rs1_value = value
+        if (rd_idx == self.rs2_idx):
+            self.rs2_value = value
+
 class StoreUnit(MemoryUnit):
     """Load Unit class, inherits from Memory Unit."""
     def __init__(self, n_entries: int) -> None:
@@ -100,9 +109,11 @@ class StoreUnit(MemoryUnit):
             }
         """
         for e in self.rs.entries:
-            if (e.getROBIdx() == resultFromMemUnit["rob_idx"]):
+            if (e["entry"].getROBIdx() == resultFromMemUnit["rob_idx"]):
+                print(f"Updating address for {e['entry']} with {resultFromMemUnit['res_value']}")
                 # Update the address
-                e.address = resultFromMemUnit["res_value"]
+                e["entry"].address = resultFromMemUnit["res_value"]
+                e["status"] = "address_ready"
 
     
     def step(self):
@@ -114,7 +125,7 @@ class StoreUnit(MemoryUnit):
         # Step 1
         if (super().hasResult()):
             # Update the reservation station with the address
-            self.updateAddress(super().getResult())
+            self.updateAddress(self.pipeline.popLastInstruction())
 
         # Step 2
         super().step()
@@ -124,13 +135,26 @@ class StoreUnit(MemoryUnit):
 # Interface with the CDB
 #-------------------------------------------------------------------------------
     def hasResult(self):
-        """Store unit never writes on CDB."""
-        return False
+        """Store unit always commits.
+        Unless it triggers memory access results, but this is not
+        implemented because the input data comes from Spike. 
+        """
+        return self.rs.hasResultDone()
+        
     
     def getResult(self):
         """Store unit never writes on CDB"""
-        return None
+        entry = self.rs.getEntryDone()
 
+        if (entry is None):
+            return None
+
+        return {
+            "res_value" : 0,
+            "rd_idx"    : entry["entry"].rd_idx,
+            "rob_idx"   : entry["entry"].getROBIdx(),
+            "valid"     : True
+        }
 
 #-------------------------------------------------------------------------------
 # Interface with the Memory 
@@ -138,20 +162,28 @@ class StoreUnit(MemoryUnit):
     def hasReadyAddress(self):
         """Returns true if there is an entry with a ready address"""
         for entry in self.rs.entries:
-            if (entry["entry"].hasReadyAddress()):
+            if (entry["status"] == "address_ready"):
                 return True
         
         return False
+
+    def getEntryWithAddressReady(self):
+        return ReservationStationPickPolicy.pickOldestReady(self.rs, status="address_ready", next_status="executing")
     
     def getReadyMemoryTransaction(self) -> dict | None:
         """Returns a ready read transaction to be sent to the memory unit"""
 
-        entry = self.rs.getEntryReadyForExecution()
-
-        if (entry["entry"].address is None):
+        if (not self.hasReadyAddress()):
             return None
 
+        entry = self.getEntryWithAddressReady()
+
         transaction = entry["entry"]
+
+        transaction.value = transaction.rs2_value
+
+        # Update the entry status
+        entry["status"] = "done"
 
         return transaction
 

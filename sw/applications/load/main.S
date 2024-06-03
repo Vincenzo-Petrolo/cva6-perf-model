@@ -18,6 +18,8 @@ _start:
         addi sp, sp, -16
         add t0, t1, t2
         lw t0, 0(sp)
+        add t1, t0, t2
+        sw t1, 0(sp)
         lw t1, 4(sp)
         lw t2, 8(sp)
         lw t3, 12(sp)

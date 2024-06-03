@@ -90,7 +90,7 @@ class LoadStoreUnit(object):
 
         for entry in self.store_unit.rs.entries:
             if (entry["status"] != "clear"):
-                if (entry["entry"].address == txn["address"]):
+                if (entry["entry"].address == txn.address):
                     return True
         
         return False

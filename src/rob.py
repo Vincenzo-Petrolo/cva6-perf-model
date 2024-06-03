@@ -40,7 +40,12 @@ class ROBEntry():
 
         entry.instruction = instr
         entry.instr_pc = instr.address
-        entry.rd_idx = instr.fields().rd
+        try:
+            entry.rd_idx = instr.fields().rd
+        except AttributeError:
+            # In case an instruction has no destination register
+            entry.rd_idx = -1
+
         entry.valid = True
 
         return entry
@@ -126,7 +131,12 @@ class ROB():
         # print(f"Updating result for ROB Entry {rob_idx}")
         entry = self.entries[rob_idx]
 
-        if entry.rd_idx == rd_idx:
+        # rd_idx == -1 means that the instruction has no destination register
+        if (entry.rd_idx == -1):
+            entry.res_ready = True
+            entry.res_value = 0
+            entry.valid = False
+        elif entry.rd_idx == rd_idx:
             entry.res_ready = True
             entry.res_value = res_value
             entry.valid = True
