@@ -5,6 +5,7 @@ from commit_unit import CommitUnit
 from mem_unit import MemoryUnit
 from queue import Queue
 from rs_pick_policy import ReservationStationPickPolicy
+from print import convertToHex
 
 import instr
 
@@ -22,7 +23,7 @@ class storeReservationStationEntry(ReservationStationEntry):
 
 
     def __str__(self):
-        return f"storeReservationStationEntry(pc={self.pc}, instr={self.instr}, ready={self.isReady()}, res_value={self.res_value}, rs1_idx={self.rs1_idx}, rs1_value={self.rs1_value}, rs2_idx={self.rs2_idx}, rs2_value={self.rs2_value}, offset={self.offset}, address={self.address})"
+        return f"storeReservationStationEntry(pc={convertToHex(self.pc)}, instr={self.instr}, ready={self.isReady()}, res_value={self.res_value}, rs1_idx={self.rs1_idx}, rs1_value={self.rs1_value}, rs2_idx={self.rs2_idx}, rs2_value={self.rs2_value}, offset={self.offset}, address={convertToHex(self.address)})"
     
     def __repr__(self):
         return self.__str__()
@@ -110,7 +111,7 @@ class StoreUnit(MemoryUnit):
         """
         for e in self.rs.entries:
             if (e["entry"].getROBIdx() == resultFromMemUnit["rob_idx"]):
-                print(f"Updating address for {e['entry']} with {resultFromMemUnit['res_value']}")
+                # print(f"Updating address for {e['entry']} with {resultFromMemUnit['res_value']}")
                 # Update the address
                 e["entry"].address = resultFromMemUnit["res_value"]
                 e["status"] = "address_ready"

@@ -16,7 +16,7 @@ class Scheduler(object):
     - dispatcher is empty,
     - the rob is empty.
     """
-    def __init__(self, test_name : str) -> None:
+    def __init__(self, test_name : str, mem_name : str) -> None:
         """Instantiate all the objects"""
         self.iq = InstrQueue(test_name)
 
@@ -28,7 +28,7 @@ class Scheduler(object):
 
         self.branch_unit = BranchUnit(8, 1, True)
 
-        self.dmem = DataMemory()
+        self.dmem = DataMemory(filename=mem_name)
 
         self.cdb = CommonDataBus()
 
@@ -74,9 +74,15 @@ class Scheduler(object):
         self.load_store_unit.step()
         self.dispatcher.step()
 
+        print(self.arith_unit.rs)
+        print(self.load_store_unit.load_unit.rs)
+        print(self.load_store_unit.store_unit.rs)
         print(self.commit_unit.rob)
 
         if (self.check()):
+
+            print("Dumping memory")
+            print(self.dmem)
             raise Exception("Simulation is over")
 
     def check(self):

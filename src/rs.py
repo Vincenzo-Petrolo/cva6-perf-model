@@ -82,7 +82,7 @@ class ReservationStation(ABC):
     - done: the entry is done, waiting to be committed
     """
 
-    def __init__(self, n_entries : int, entry_t : type[ReservationStationEntry], pick_policy = ReservationStationPickPolicy.pickNewestReady) -> None:
+    def __init__(self, n_entries : int, entry_t : type[ReservationStationEntry], pick_policy = ReservationStationPickPolicy.pickOldestReady) -> None:
         super().__init__()
         self.n_entries = n_entries
 
@@ -101,7 +101,10 @@ class ReservationStation(ABC):
     
 
     def __str__(self):
-        return f"ReservationStation(n_entries={self.n_entries}, entries={self.entries})"
+        string = ""
+        for i, e in enumerate(self.entries):
+            string += f"{i}: {e}\n"
+        return string
     
     def __repr__(self):
         return self.__str__()

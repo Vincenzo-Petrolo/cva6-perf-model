@@ -56,7 +56,8 @@ class loadReservationStationEntry(ReservationStationEntry):
         # print(commit_unit.commit_queue.queue)
         # Search for rs1
         entry = commit_unit.searchOperand(self.rs1_idx, self.pc)
-        # print(entry)
+
+        print(f"[{__class__}] Forwarding operands from ROB {entry}\n for {self}")
 
         cdb_last_result = cdb.getLastResult()
         # print(f"CDB last result: {cdb_last_result}")
@@ -97,7 +98,7 @@ class LoadUnit(MemoryUnit):
                 # Update the address
                 e["entry"].address = resultFromMemUnit["res_value"]
                 e["status"] = "address_ready"
-                print(f"Updated address for {e['entry']} status {e['status']}")
+                # print(f"Updated address for {e['entry']} status {e['status']}")
 
     
     def step(self):
@@ -106,7 +107,7 @@ class LoadUnit(MemoryUnit):
         2. Step the inner memory unit which will compute the address.
         """
 
-        print(self.rs.entries)
+        # print(self.rs.entries)
         # Step 1
         if (super().hasResult()):
             # Update the reservation station with the address

@@ -6,11 +6,11 @@ unsigned long long fromhost = 0;
 
 void _start(void) {
 
-    int data[N] = {0,1,2,3,4,5,6,7,8,9};
+    int data[N] = {63, 37, 45, 23, 12, 67, 89, 12, 34, 56};
 
     int sum = 0;
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < N; i++)
     {
         sum += data[i];
     }

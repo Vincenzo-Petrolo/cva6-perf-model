@@ -105,16 +105,16 @@ class LoadStoreUnit(object):
         # Check the Load Unit
         if (self.load_unit.hasReadyAddress()):
             txn = self.load_unit.getReadyMemoryTransaction()
-            print("Load Unit has ready memory transaction")
+            # print("Load Unit has ready memory transaction")
             # Check for speculative load hazard
             if (self.speculativeLoadHazardCheck(txn)):
-                print("Speculative Load Hazard Detected")
+                # print("Speculative Load Hazard Detected")
                 self.load_unit.restoreAddressReady(txn)
                 txn = None
 
         # if no load transaction can be issued, then check the store unit
         if (txn is None and self.store_unit.hasReadyAddress()):
-            print("Store Unit has ready memory transaction")
+            # print("Store Unit has ready memory transaction")
             txn = self.store_unit.getReadyMemoryTransaction()
 
         return txn

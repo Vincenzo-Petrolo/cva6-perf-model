@@ -149,6 +149,7 @@ class ArithUnit(ExecUnit):
             case 0b0110011:
                 if (entry.func3 == 0b000 and entry.func7 == 0b0000000):
                     # ADD
+                    print(f"ADD {entry.rs1_value} + {entry.rs2_value}")
                     return entry.rs1_value + entry.rs2_value
                 elif (entry.func3 == 0b000 and entry.func7 == 0b0100000):
                     # SUB

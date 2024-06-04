@@ -152,6 +152,12 @@ class ROB():
                 return entry
 
             i = (i-1) % self.size
+        
+        # Check the head
+        entry = self.entries[self.head]
+        if entry.rd_idx == rs_idx and entry.valid and entry.instr_pc != inst_addr:
+            return entry
+
         return None
     
     def canCommit(self) -> bool:

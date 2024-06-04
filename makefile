@@ -67,7 +67,7 @@ $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf
 	$(RISCV_EXE_PREFIX)-objcopy -O binary $< $@
 
 $(BUILD_DIR)/%.mem: $(BUILD_DIR)/%.elf
-	$(RISCV_EXE_PREFIX)-objcopy -O verilog $< $@
+	$(RISCV_EXE_PREFIX)-objcopy -w -O verilog --only-section=*data* $< $@
 
 # Linked executable firmware
 $(BUILD_DIR)/%.elf: $(OBJS)

@@ -40,7 +40,7 @@ class CommitUnit( object ):
         # print(f"CDB: {self.cdb.buffer_o.full()}")
         cdb_entry = self.cdb.get()
 
-        print(f"Got CDB Entry: {cdb_entry}")
+        # print(f"Got CDB Entry: {cdb_entry}")
 
         if cdb_entry:
             self.rob.updateResult(cdb_entry["rd_idx"], cdb_entry["res_value"], cdb_entry["rob_idx"])
@@ -55,7 +55,7 @@ class CommitUnit( object ):
         if not self.commit_queue.empty():
             entry = self.commit_queue.get()
             # Step 3 If the entry is valid, write to the RF
-            print(f"Committing Instruction: {entry.instruction} at {convertToHex(entry.instr_pc)}")
+            # print(f"Committing Instruction: {entry.instruction} at {convertToHex(entry.instr_pc)}")
             if entry.valid:
                 self.rf.write(entry.rd_idx, entry.res_value)
         
