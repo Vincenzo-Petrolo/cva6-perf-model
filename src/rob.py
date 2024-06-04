@@ -1,4 +1,5 @@
 from instr import Instruction
+from print import convertToHex
 
 class ROBEntry():
     def __init__(self) -> None:
@@ -17,7 +18,7 @@ class ROBEntry():
 
     def __str__(self):
         instr_pc = self.instr_pc if self.instr_pc is not None else 0
-        return f"ROBEntry(instruction={self.instruction}, instr_pc=0x{instr_pc :02x}, res_ready={self.res_ready}, res_value={self.res_value}, rd_idx={self.rd_idx}, valid={self.valid})"
+        return f"ROBEntry(instruction={self.instruction}, instr_pc={convertToHex(instr_pc)}, res_ready={self.res_ready}, res_value={convertToHex(self.res_value)}, rd_idx={self.rd_idx}, valid={self.valid})"
 
     def __repr__(self):
         return self.__str__()
@@ -142,15 +143,15 @@ class ROB():
         """Searches the most recent entry that has rd_idx with the rs_idx
         it must be valid, and of course, it must not be the current instruction.
         Keep in mind that the ROB is a circular buffer, so we must search
-        from the head to the tail."""
-        i = self.head
-        while i != self.tail:
+        from the tail to the head."""
+        i = self.tail
+        while i != self.head:
             entry = self.entries[i]
 
             if entry.rd_idx == rs_idx and entry.valid and entry.instr_pc != inst_addr:
                 return entry
 
-            i = (i+1) % self.size
+            i = (i-1) % self.size
         return None
     
     def canCommit(self) -> bool:

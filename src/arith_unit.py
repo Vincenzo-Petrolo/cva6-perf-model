@@ -3,7 +3,7 @@ from exec_unit import ExecUnit
 from rf import RF
 from rs import ReservationStationEntry
 from cdb import CommonDataBus
-
+from print import convertToHex
 import instr, isa
 
 
@@ -23,7 +23,7 @@ class arithReservationStationEntry(ReservationStationEntry):
 
 
     def __str__(self):
-        return f"arithReservationStationEntry(pc={self.pc}, instr={self.instr}, ready={self.isReady()}, res_value={self.res_value}, rd_idx={self.rd_idx}, rs1_idx={self.rs1_idx}, rs1_value={self.rs1_value}, rs2_idx={self.rs2_idx}, rs2_value={self.rs2_value}, op={self.op})"
+        return f"arithReservationStationEntry(pc={convertToHex(self.pc)}, instr={self.instr}, ready={self.isReady()}, res_value={convertToHex(self.res_value)}, rd_idx={self.rd_idx}, rs1_idx={self.rs1_idx}, rs1_value={convertToHex(self.rs1_value)}, rs2_idx={self.rs2_idx}, rs2_value={convertToHex(self.rs2_value)}, op={self.op})"
     
     def __repr__(self):
         return self.__str__()

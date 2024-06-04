@@ -5,6 +5,7 @@ from commit_unit import CommitUnit
 from mem_unit import MemoryUnit
 from queue import Queue
 from rs_pick_policy import ReservationStationPickPolicy
+from print import convertToHex
 
 import instr
 
@@ -20,7 +21,9 @@ class loadReservationStationEntry(ReservationStationEntry):
 
 
     def __str__(self):
-        return f"loadReservationStationEntry(pc={self.pc}, instr={self.instr}, ready={self.isReady()}, res_value={self.res_value}, rd_idx={self.rd_idx}, rs1_idx={self.rs1_idx}, rs1_value={self.rs1_value}, offset={self.offset}, address={self.address})"
+        if (self.pc is None):
+            self.pc = 0
+        return f"loadReservationStationEntry(pc={convertToHex(self.pc)}, instr={self.instr}, ready={self.isReady()}, res_value={self.res_value}, rd_idx={self.rd_idx}, rs1_idx={self.rs1_idx}, rs1_value={self.rs1_value}, offset={self.offset}, address={convertToHex(self.address)})"
     
     def __repr__(self):
         return self.__str__()

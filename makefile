@@ -49,7 +49,7 @@ export
 # --------------
 # Application build
 .PHONY: app
-app: $(BUILD_DIR)/main.hex $(BUILD_DIR)/main.disasm $(BUILD_DIR)/main.elf
+app: $(BUILD_DIR)/main.hex $(BUILD_DIR)/main.disasm $(BUILD_DIR)/main.elf $(BUILD_DIR)/main.mem
 
 $(BUILD_DIR)/main.%: $(BUILD_DIR)/applications/$(PROJECT)/main.%
 	cp $< $@
@@ -66,6 +66,9 @@ $(BUILD_DIR)/%.disasm: $(BUILD_DIR)/%.elf
 $(BUILD_DIR)/%.bin: $(BUILD_DIR)/%.elf
 	$(RISCV_EXE_PREFIX)-objcopy -O binary $< $@
 
+$(BUILD_DIR)/%.mem: $(BUILD_DIR)/%.elf
+	$(RISCV_EXE_PREFIX)-objcopy -O verilog $< $@
+
 # Linked executable firmware
 $(BUILD_DIR)/%.elf: $(OBJS)
 	$(RISCV_EXE_PREFIX)-gcc $(CFLAGS) $(LDFLAGS_PRE) $(INC_FOLDERS_GCC) $^ $(LDFLAGS_POST) -o $@
@@ -79,7 +82,7 @@ $(BUILD_DIR)/%.o: ./%.S | $(BUILD_DIR)/applications/$(PROJECT)/
 	$(RISCV_EXE_PREFIX)-gcc $(CFLAGS) $(CDEFS) $(INC_FOLDERS_GCC) -c $< -o $@
 
 .PHONY: spike-trace
-spike-trace: $(BUILD_DIR)/spike-trace.log
+spike-trace: app $(BUILD_DIR)/spike-trace.log
 $(BUILD_DIR)/spike-trace.log: $(BUILD_DIR)/main.elf
 	@echo "## Running simulation with Spike..."
 	spike --log=$@ -l --isa=rv32i $<

@@ -1,4 +1,5 @@
 from rob import ROB, ROBEntry
+from print import convertToHex
 
 # Import the queue data structure from the Python standard library
 from queue import Queue
@@ -54,7 +55,7 @@ class CommitUnit( object ):
         if not self.commit_queue.empty():
             entry = self.commit_queue.get()
             # Step 3 If the entry is valid, write to the RF
-            print(f"Committing Instruction: {entry.instruction} at 0x{entry.instr_pc:08X}")
+            print(f"Committing Instruction: {entry.instruction} at {convertToHex(entry.instr_pc)}")
             if entry.valid:
                 self.rf.write(entry.rd_idx, entry.res_value)
         
