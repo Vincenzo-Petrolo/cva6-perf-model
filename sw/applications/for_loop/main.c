@@ -6,6 +6,17 @@ unsigned long long fromhost = 0;
 
 void _start(void) {
 
+    /*must set the stack pointer*/
+    asm volatile("la sp, _sp");
+
+    main();
+
+}
+
+int main(void) {
+
+
+
     int data[N] = {63, 37, 45, 23, 12, 67, 89, 12, 34, 56};
 
     int sum = 0;
@@ -17,7 +28,6 @@ void _start(void) {
 
     tohost = 1;
 
-    return;
-    
+    return 0;
 
 }

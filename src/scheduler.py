@@ -83,6 +83,9 @@ class Scheduler(object):
 
             print("Dumping memory")
             print(self.dmem)
+
+            print("Commit history")
+            print(self.commit_unit.commitHistory())
             raise Exception("Simulation is over")
 
     def check(self):

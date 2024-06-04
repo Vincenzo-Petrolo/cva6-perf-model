@@ -19,7 +19,7 @@ class storeReservationStationEntry(ReservationStationEntry):
         self.rs2_value  = None
         self.offset     = None
         self.address    = None
-        self.rd_idx     = None
+        self.rd_idx     = -1
 
 
     def __str__(self):
@@ -29,8 +29,8 @@ class storeReservationStationEntry(ReservationStationEntry):
         return self.__str__()
 
     def convertToEntry(instr : instr.Instruction):
-        """Instruction can be of R-type or I-type."""
         # Create the entry object
+        print(f"Converting {instr} to store entry with rob_idx {instr.rob_idx}")
         entry = storeReservationStationEntry()
         entry.setInstr(instr.mnemo)
         entry.setPC(instr.address)
@@ -55,7 +55,7 @@ class storeReservationStationEntry(ReservationStationEntry):
 
         # print(commit_unit.commit_queue.queue)
         # Search for rs1
-        entry = commit_unit.searchOperand(self.rs1_idx, self.pc)
+        entry, rob_idx = commit_unit.searchOperand(self.rs1_idx, self.pc)
         # print(entry)
 
         cdb_last_result = cdb.getLastResult()
@@ -65,6 +65,8 @@ class storeReservationStationEntry(ReservationStationEntry):
             if (entry.res_ready):
                 # print(f"Forwarding rs1 value {entry.res_value} to {self}")
                 self.rs1_value = entry.res_value
+            elif (rob_idx is not None):
+                self.rs1_idx = rob_idx
         elif (cdb_last_result is not None and cdb_last_result["rd_idx"] == self.rs1_idx):
             # print(f"Forwarding CDB value {cdb_last_result['res_value']} to {self}")
             self.rs1_value = cdb_last_result["res_value"]
@@ -73,13 +75,15 @@ class storeReservationStationEntry(ReservationStationEntry):
             # print(f"Fetching rs1 value {rf[self.rs1_idx]} from RF {self}")
             self.rs1_value = rf[self.rs1_idx]
 
-        entry = commit_unit.searchOperand(self.rs2_idx, self.pc)
+        entry, rob_idx = commit_unit.searchOperand(self.rs2_idx, self.pc)
         # print(entry)
 
         if (entry is not None):
             if (entry.res_ready):
                 # print(f"Forwarding rs2 value {entry.res_value} to {self}")
                 self.rs2_value = entry.res_value
+            elif (rob_idx is not None):
+                self.rs2_idx = rob_idx
         elif (cdb_last_result is not None and cdb_last_result["rd_idx"] == self.rs2_idx):
             # print(f"Forwarding CDB value {cdb_last_result['res_value']} to {self}")
             self.rs2_value = cdb_last_result["res_value"]
@@ -88,11 +92,11 @@ class storeReservationStationEntry(ReservationStationEntry):
             # print(f"Fetching rs2 value {rf[self.rs2_idx]} from RF {self}")
             self.rs2_value = rf[self.rs2_idx]
 
-    def updateFromCDB(self, rd_idx, value):
+    def updateFromCDB(self, rob_idx, value):
         """Update the entry with the value from the CDB."""
-        if (rd_idx == self.rs1_idx):
+        if (rob_idx == self.rs1_idx):
             self.rs1_value = value
-        if (rd_idx == self.rs2_idx):
+        if (rob_idx == self.rs2_idx):
             self.rs2_value = value
 
 class StoreUnit(MemoryUnit):
@@ -110,8 +114,8 @@ class StoreUnit(MemoryUnit):
             }
         """
         for e in self.rs.entries:
-            if (e["entry"].getROBIdx() == resultFromMemUnit["rob_idx"]):
-                # print(f"Updating address for {e['entry']} with {resultFromMemUnit['res_value']}")
+            if (e["entry"].getROBIdx() == resultFromMemUnit["rob_idx"] and e["status"] == "executing"):
+                print(f"Updating address for {e['entry']} with {resultFromMemUnit['res_value']}")
                 # Update the address
                 e["entry"].address = resultFromMemUnit["res_value"]
                 e["status"] = "address_ready"
@@ -146,6 +150,8 @@ class StoreUnit(MemoryUnit):
     def getResult(self):
         """Store unit never writes on CDB"""
         entry = self.rs.getEntryDone()
+
+        print(f"{__class__.__name__} {entry}")
 
         if (entry is None):
             return None

@@ -23,6 +23,9 @@ class CommitUnit( object ):
         # Dispatcher handle
         self.dispatcher = None
 
+        # Commit hisotry
+        self.commit_history = []
+
 
     def step(self):
         """Steps to perform in a cycle:
@@ -55,8 +58,9 @@ class CommitUnit( object ):
         if not self.commit_queue.empty():
             entry = self.commit_queue.get()
             # Step 3 If the entry is valid, write to the RF
-            # print(f"Committing Instruction: {entry.instruction} at {convertToHex(entry.instr_pc)}")
+            print(f"Committing Instruction: {entry.instruction} at {convertToHex(entry.instr_pc)} with value {entry.res_value}")
             if entry.valid:
+                self.commit_history.append(entry)
                 self.rf.write(entry.rd_idx, entry.res_value)
         
         if (full):
@@ -96,23 +100,30 @@ class CommitUnit( object ):
         """Connect the dispatcher to the commit unit."""
         self.dispatcher = dispatcher
 
-    def searchOperand(self, rs_idx: int, instr_addr : int) -> int:
+    def searchOperand(self, rs_idx: int, instr_addr : int) -> tuple:
         """Search for the operand in the commit stage for forwarding."""
+        if (rs_idx == 0):
+            entry = ROBEntry()
+            entry.res_value = 0
+            entry.valid = True
+            entry.res_ready = True
+            return entry, None
+
         # Search in the ROB
-        operand = self.rob.searchOperand(rs_idx, instr_addr)
+        operand, rob_idx = self.rob.searchOperand(rs_idx, instr_addr)
         
         # Found
         if (operand is not None):
-            return operand
+            return operand, rob_idx
         
         # Search in the commit queue
         for entry in self.commit_queue.queue:
             if entry.rd_idx == rs_idx and entry.valid:
                 # Found, return the value
-                return entry
+                return entry, None
 
         # Not found
-        return None
+        return None, None
     
     def check_connections(self):
         """Checks wether all the handles are not None."""
@@ -128,3 +139,11 @@ class CommitUnit( object ):
     def empty(self) -> bool:
         """Check if the commit unit is empty."""
         return self.rob.is_empty() and self.commit_queue.empty()
+
+    def commitHistory(self):
+        """Return the commit history as a string"""
+        string = ""
+        for entry in self.commit_history:
+            string += f"{convertToHex(entry.instr_pc)}: {entry.instruction} -> {convertToHex(entry.res_value)}\n"
+
+        return string

@@ -55,9 +55,9 @@ class loadReservationStationEntry(ReservationStationEntry):
 
         # print(commit_unit.commit_queue.queue)
         # Search for rs1
-        entry = commit_unit.searchOperand(self.rs1_idx, self.pc)
+        entry, rob_idx = commit_unit.searchOperand(self.rs1_idx, self.pc)
 
-        print(f"[{__class__}] Forwarding operands from ROB {entry}\n for {self}")
+        # print(f"[{__class__}] Forwarding operands from ROB {entry}\n for {self}")
 
         cdb_last_result = cdb.getLastResult()
         # print(f"CDB last result: {cdb_last_result}")
@@ -66,6 +66,8 @@ class loadReservationStationEntry(ReservationStationEntry):
             if (entry.res_ready):
                 # print(f"Forwarding rs1 value {entry.res_value} to {self}")
                 self.rs1_value = entry.res_value
+            elif (rob_idx is not None):
+                self.rs1_idx = rob_idx
         elif (cdb_last_result is not None and cdb_last_result["rd_idx"] == self.rs1_idx):
             # print(f"Forwarding CDB value {cdb_last_result['res_value']} to {self}")
             self.rs1_value = cdb_last_result["res_value"]
@@ -74,9 +76,9 @@ class loadReservationStationEntry(ReservationStationEntry):
             # print(f"Fetching rs1 value {rf[self.rs1_idx]} from RF {self}")
             self.rs1_value = rf[self.rs1_idx]
     
-    def updateFromCDB(self, rd_idx, value):
+    def updateFromCDB(self, rob_idx, value):
         """Update the entry with the value from the CDB."""
-        if (rd_idx == self.rs1_idx):
+        if (rob_idx == self.rs1_idx):
             self.rs1_value = value
 
 class LoadUnit(MemoryUnit):

@@ -17,6 +17,7 @@ fromhost: .dword 0
 _start:
         addi t2, t1, 10; # t0 = t1 + 10
         addi t1, t2, 20; # t1 = t2 + 20
+        addi t0, t1, -30; # t0 = t1 + 30
         add t2, t1, t2
         add t0, t1, t2; # t0 = t1 + t2
         add t0, t1, t2; # t0 = t1 + t2

@@ -129,10 +129,10 @@ class DataMemory(object):
                 self.mem[addr+1] = (value >> 8) & 0xFF
             case _:
                 print(f"Writing {value} to {convertToHex(addr)}")
-                self.mem[addr] = value & 0xFF
-                self.mem[addr+1] = (value >> 8) & 0xFF
-                self.mem[addr+2] = (value >> 16) & 0xFF
-                self.mem[addr+3] = (value >> 24) & 0xFF
+                self.mem[addr+3] = value & 0xFF
+                self.mem[addr+2] = (value >> 8) & 0xFF
+                self.mem[addr+1] = (value >> 16) & 0xFF
+                self.mem[addr] = (value >> 24) & 0xFF
     
     def _loadMemoryFromFile(self, filename : str):
         """Load the memory from a file in verilog format obtained

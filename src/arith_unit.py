@@ -85,16 +85,18 @@ class arithReservationStationEntry(ReservationStationEntry):
 
         # print(commit_unit.commit_queue.queue)
         # Search for rs1
-        entry = commit_unit.searchOperand(self.rs1_idx, self.pc)
-        # print(entry)
+        entry, rob_idx = commit_unit.searchOperand(self.rs1_idx, self.pc)
 
         cdb_last_result = cdb.getLastResult()
         # print(f"CDB last result: {cdb_last_result}")
 
         if (entry is not None):
             if (entry.res_ready):
+                # In case the result is ready both in ROB or in the commit queue
                 # print(f"Forwarding rs1 value {entry.res_value} to {self}")
                 self.rs1_value = entry.res_value
+            elif (rob_idx is not None):
+                self.rs1_idx = rob_idx
         elif (cdb_last_result is not None and cdb_last_result["rd_idx"] == self.rs1_idx):
             # print(f"Forwarding CDB value {cdb_last_result['res_value']} to {self}")
             self.rs1_value = cdb_last_result["res_value"]
@@ -107,13 +109,15 @@ class arithReservationStationEntry(ReservationStationEntry):
         if (arithReservationStationEntry.Rtype(self.op)):
             # R-type, search for RS2 too
             # print(commit_unit.commit_queue.queue)
-            entry = commit_unit.searchOperand(self.rs2_idx, self.pc)
+            entry, rob_idx = commit_unit.searchOperand(self.rs2_idx, self.pc)
             # print(entry)
 
             if (entry is not None):
                 if (entry.res_ready):
                     # print(f"Forwarding rs2 value {entry.res_value} to {self}")
                     self.rs2_value = entry.res_value
+                elif (rob_idx is not None):
+                    self.rs2_idx = rob_idx
             elif (cdb_last_result is not None and cdb_last_result["rd_idx"] == self.rs2_idx):
                 # print(f"Forwarding CDB value {cdb_last_result['res_value']} to {self}")
                 self.rs2_value = cdb_last_result["res_value"]
@@ -122,13 +126,13 @@ class arithReservationStationEntry(ReservationStationEntry):
                 # print(f"Fetching rs2 value {rf[self.rs2_idx]} from RF {self}")
                 self.rs2_value = rf[self.rs2_idx]
     
-    def updateFromCDB(self, rd_idx, value):
+    def updateFromCDB(self, rob_idx, value):
         """Check if can update entry with the value from the CDB."""
-        if (self.rs1_idx == rd_idx):
+        if (self.rs1_idx == rob_idx):
             self.rs1_value = value
 
         if (arithReservationStationEntry.Rtype(self.op)):
-            if (self.rs2_idx == rd_idx):
+            if (self.rs2_idx == rob_idx):
                 self.rs2_value = value
 
 

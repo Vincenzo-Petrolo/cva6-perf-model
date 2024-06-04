@@ -67,7 +67,7 @@ class CommonDataBus(object):
                 self.buffer_o.put(result)
                 # Step 5
                 for eu in self.EUS:
-                    eu.rs.updateFromCDB(result["rd_idx"],
+                    eu.rs.updateFromCDB(result["rob_idx"],
                                         result["res_value"]
                     )
                 

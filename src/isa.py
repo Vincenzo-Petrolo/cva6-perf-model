@@ -89,6 +89,10 @@ def sign_ext(imm, index, xlen=32):
     sext = neg * sext_ones << imm_bits
     return sext | imm
 
+def sign_extend(value, bits):
+    sign_bit = 1 << (bits - 1)
+    return (value & (sign_bit - 1)) - (value & sign_bit)
+
 @dataclass
 class AddrFields:
     """Represents the data used to build a memory address"""
@@ -112,7 +116,7 @@ class Itype:
         self.funct3 = (instr.bin >> 12) & 7
         self.rd = (instr.bin >> 7) & 31
         self.opcode = instr.bin & 63
-        self.imm = sign_ext(instr.bin >> 20, 11)
+        self.imm = sign_extend(instr.bin >> 20, 12)
 
 class Stype:
     """S-type instructions"""
@@ -121,10 +125,10 @@ class Stype:
         self.rs1 = (instr.bin >> 15) & 31
         self.funct3 = (instr.bin >> 12) & 7
         self.opcode = instr.bin & 63
-        self.imm = sign_ext(
+        self.imm = sign_extend(
             ((instr.bin >> 25) << 5) \
             | ((instr.bin >> 7) & 31)
-        , 11)
+        , 12)
 
 class Btype:
     """B-type instructions"""

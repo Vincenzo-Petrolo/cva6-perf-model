@@ -128,6 +128,7 @@ class ROB():
             entry.res_value = res_value
             entry.valid = True
         else:
+            print(f"ROB Entry {rob_idx} does not match the destination register {rd_idx}")
             raise ValueError(f"ROB Entry {rob_idx} does not match the destination register {rd_idx}")
 
     def __getitem__(self, key: int) -> ROBEntry:
@@ -139,7 +140,7 @@ class ROB():
     def __len__(self) -> int:
         return self.size
     
-    def searchOperand(self, rs_idx: int, inst_addr : int) -> ROBEntry:
+    def searchOperand(self, rs_idx: int, inst_addr : int) -> tuple:
         """Searches the most recent entry that has rd_idx with the rs_idx
         it must be valid, and of course, it must not be the current instruction.
         Keep in mind that the ROB is a circular buffer, so we must search
@@ -149,16 +150,16 @@ class ROB():
             entry = self.entries[i]
 
             if entry.rd_idx == rs_idx and entry.valid and entry.instr_pc != inst_addr:
-                return entry
+                return entry, i
 
             i = (i-1) % self.size
         
         # Check the head
         entry = self.entries[self.head]
         if entry.rd_idx == rs_idx and entry.valid and entry.instr_pc != inst_addr:
-            return entry
+            return entry, self.head
 
-        return None
+        return None, None
     
     def canCommit(self) -> bool:
         """Check if the head of the ROB can be committed."""
