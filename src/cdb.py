@@ -63,7 +63,7 @@ class CommonDataBus(object):
             if eu.hasResult() or eu.hasDoneInReservationStation():
                 # Step 4
                 result = eu.getResult()
-                print(f"CDB Step, getting {result} from {eu}")
+                # print(f"CDB Step, getting {result} from {eu}")
                 # assert (result["res_value"] is not None)
                 self.buffer_o.put(result)
                 # Step 5

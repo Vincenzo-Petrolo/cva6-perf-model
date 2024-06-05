@@ -78,7 +78,7 @@ class Scheduler(object):
         # print(self.arith_unit.rs)
         # print(self.load_store_unit.load_unit.rs)
         # print(self.load_store_unit.store_unit.rs)
-        # print(self.commit_unit.rob)
+        print(self.commit_unit.rob)
 
         if (self.check()):
 

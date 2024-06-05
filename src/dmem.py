@@ -15,8 +15,8 @@ class DataMemory(object):
 
         if (filename is not None):
             self._loadMemoryFromFile(filename)
-            print(f"Loaded memory from {filename}")
-            print(self)
+            # print(f"Loaded memory from {filename}")
+            # print(self)
 
         # Cache latency
         self.cache_latency = cache_latency
@@ -59,7 +59,7 @@ class DataMemory(object):
             elif (type(self.curr_txn) == storeReservationStationEntry):
                 self.write(self.curr_txn.address, self.curr_txn.rs2_value)
             else:
-                print(self.curr_txn)
+                # print(self.curr_txn)
                 raise Exception("Invalid transaction type")
 
         
@@ -99,7 +99,7 @@ class DataMemory(object):
         # If the random number between 0 and 1 is less than the cache hit rate, then we have a hit, else a miss
         self.txn_counter = self.cache_latency if (random.random() < self.cache_hit_rate) else self.mem_latency
 
-        print(f"Starting transaction with counter {self.txn_counter}")
+        # print(f"Starting transaction with counter {self.txn_counter}")
     
     def read(self, addr : int, mode : str = 'w') -> int:
         """Read from the memory.
@@ -116,7 +116,7 @@ class DataMemory(object):
                 return self.mem[addr+1] + (self.mem[addr] << 8)
             case _:
                 read_val = self.mem[addr+3] + (self.mem[addr+2] << 8) + (self.mem[addr+1] << 16) + (self.mem[addr] << 24)
-                print(f"Reading from {convertToHex(addr)} value {read_val}")
+                # print(f"Reading from {convertToHex(addr)} value {read_val}")
 
                 return read_val
 
@@ -130,7 +130,7 @@ class DataMemory(object):
                 self.mem[addr] = value & 0xFF
                 self.mem[addr+1] = (value >> 8) & 0xFF
             case _:
-                print(f"Writing {value} to {convertToHex(addr)}")
+                # print(f"Writing {value} to {convertToHex(addr)}")
                 self.mem[addr+3] = value & 0xFF
                 self.mem[addr+2] = (value >> 8) & 0xFF
                 self.mem[addr+1] = (value >> 16) & 0xFF

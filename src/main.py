@@ -17,9 +17,13 @@ def main():
 
     i = 0
 
-    while i < 600: # Just for debugging
+    while True: # Just for debugging
         print(f"Step {i}")
-        scheduler.step()
+        try:
+            scheduler.step()
+        except Exception as e:
+            print(f"Exception: {e}")
+            break
 
         i += 1
 

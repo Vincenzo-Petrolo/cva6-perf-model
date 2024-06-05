@@ -129,12 +129,6 @@ class arithReservationStationEntry(ReservationStationEntry):
                 # print(f"Fetching rs2 value {rf[self.rs2_idx]} from RF {self}")
                 self.rs2_value = rf[self.rs2_idx]
 
-            # if (self.pc == 0x800000ac):
-            #     print(f"forward2: {self.rs2_value}")
-        
-        if (self.pc == 0x800000b8):
-            print("Forwarding add", self)
-            print(commit_unit.rob)
     
     def updateFromCDB(self, rob_idx, value):
         """Check if can update entry with the value from the CDB."""
@@ -144,10 +138,6 @@ class arithReservationStationEntry(ReservationStationEntry):
         if (arithReservationStationEntry.Rtype(self.op)):
             if (self.rs2_value is None and self.rs2_idx == rob_idx):
                 self.rs2_value = value
-
-        if (self.pc == 0x800000b8):
-            print("Updating add", self)
-        
 
 
         

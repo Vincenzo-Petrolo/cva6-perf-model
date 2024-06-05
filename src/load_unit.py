@@ -79,7 +79,7 @@ class loadReservationStationEntry(ReservationStationEntry):
     def updateFromCDB(self, rob_idx, value):
         """Update the entry with the value from the CDB."""
         if (self.rs1_value is None and rob_idx == self.rs1_idx):
-            print(f"Updating {self} with value {value} sourcing from {rob_idx}")
+            # print(f"Updating {self} with value {value} sourcing from {rob_idx}")
             self.rs1_value = value
 
 class LoadUnit(MemoryUnit):
@@ -130,7 +130,7 @@ class LoadUnit(MemoryUnit):
     def getResult(self):
         """Returns result from the reservation station"""
         entry = self.rs.getEntryDone()
-        print(self.rs)
+        # print(self.rs)
 
         if (entry is None):
             return None

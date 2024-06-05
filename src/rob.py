@@ -126,7 +126,7 @@ class ROB():
     
     def updateResult(self, rd_idx: int, res_value: int, rob_idx : int) -> None:
         """Update the result of the instruction in the ROB, this comes from the CDB."""
-        print(f"Updating result for ROB Entry {rob_idx}")
+        # print(f"Updating result for ROB Entry {rob_idx}")
         entry = self.entries[rob_idx]
 
         # rd_idx == -1 means that the instruction has no destination register
@@ -139,9 +139,9 @@ class ROB():
             entry.res_value = res_value
             entry.valid = True
         else:
-            print(f"ROB Entry {rob_idx} does not match the destination register {rd_idx}")
+            # print(f"ROB Entry {rob_idx} does not match the destination register {rd_idx}")
             raise ValueError(f"ROB Entry {rob_idx} does not match the destination register {rd_idx}")
-        print(entry)
+        # print(entry)
 
     def __getitem__(self, key: int) -> ROBEntry:
         return self.entries[key]
@@ -159,7 +159,7 @@ class ROB():
         from the tail to the head."""
         i = self.tail-1
         cnt = 0
-        print(f"Starting from tail {i}, and head {self.head}")
+        # print(f"Starting from tail {i}, and head {self.head}")
         while cnt < self.count:
             entry = self.entries[i]
 

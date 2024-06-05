@@ -49,13 +49,13 @@ class LoadStoreUnit(object):
             txn = self.mem.getReadyTransaction()
             if (type(txn) == loadReservationStationEntry):
                 self.load_unit.updateResult(txn)
-                print(f"Updated load txn: {txn} with ROBidx: {txn.getROBIdx()}")
+                # print(f"Updated load txn: {txn} with ROBidx: {txn.getROBIdx()}")
         # Step 2
         elif (self.mem.canStartTransaction()):
             txn = self.getStartableTransactions()
             if (txn is not None):
-                print(f"Starting transaction")
-                print(f"Picked txn: {txn} with ROBIdx: {txn.getROBIdx()}")
+                # print(f"Starting transaction")
+                # print(f"Picked txn: {txn} with ROBIdx: {txn.getROBIdx()}")
                 self.mem.startTransaction(txn)
         
         # Step 3,4,5
@@ -166,8 +166,8 @@ class LoadStoreUnit(object):
                     # I think this will never happen, because if it is at ROB head
                     # then all the other instructions have committed and it can't 
                     # be updated anymore, so raise an exception here
-                    print(txn)
-                    print(self.load_unit.rs)
+                    # print(txn)
+                    # print(self.load_unit.rs)
                     raise Exception("TXN is waiting for operands, this should not happen")
                 case _:
                     return None
