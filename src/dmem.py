@@ -57,8 +57,9 @@ class DataMemory(object):
             if (type(self.curr_txn) == loadReservationStationEntry):
                 self.curr_txn.setResult(self.read(self.curr_txn.address))
             elif (type(self.curr_txn) == storeReservationStationEntry):
-                self.write(self.curr_txn.address, self.curr_txn.value)
+                self.write(self.curr_txn.address, self.curr_txn.rs2_value)
             else:
+                print(self.curr_txn)
                 raise Exception("Invalid transaction type")
 
         
@@ -98,6 +99,7 @@ class DataMemory(object):
         # If the random number between 0 and 1 is less than the cache hit rate, then we have a hit, else a miss
         self.txn_counter = self.cache_latency if (random.random() < self.cache_hit_rate) else self.mem_latency
 
+        print(f"Starting transaction with counter {self.txn_counter}")
     
     def read(self, addr : int, mode : str = 'w') -> int:
         """Read from the memory.

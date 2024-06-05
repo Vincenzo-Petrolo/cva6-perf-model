@@ -49,7 +49,18 @@ class ROB():
 
     def __str__(self):
         """Dump each entry of the ROB."""
-        return "\n".join([f"ROB[{i}]={entry}" for i, entry in enumerate(self.entries)])
+        string = ""
+        # iterate from head to tail
+        i = self.head
+        cnt = 0
+        while cnt < self.count:
+            string += f"ROB[{i}] = {self.entries[i]}\n"
+            i = (i + 1) % self.size
+            cnt += 1
+        
+        return string
+
+
 
 
     def __repr__(self):
@@ -115,7 +126,7 @@ class ROB():
     
     def updateResult(self, rd_idx: int, res_value: int, rob_idx : int) -> None:
         """Update the result of the instruction in the ROB, this comes from the CDB."""
-        # print(f"Updating result for ROB Entry {rob_idx}")
+        print(f"Updating result for ROB Entry {rob_idx}")
         entry = self.entries[rob_idx]
 
         # rd_idx == -1 means that the instruction has no destination register
@@ -130,6 +141,7 @@ class ROB():
         else:
             print(f"ROB Entry {rob_idx} does not match the destination register {rd_idx}")
             raise ValueError(f"ROB Entry {rob_idx} does not match the destination register {rd_idx}")
+        print(entry)
 
     def __getitem__(self, key: int) -> ROBEntry:
         return self.entries[key]
@@ -145,14 +157,17 @@ class ROB():
         it must be valid, and of course, it must not be the current instruction.
         Keep in mind that the ROB is a circular buffer, so we must search
         from the tail to the head."""
-        i = self.tail
-        while i != self.head:
+        i = self.tail-1
+        cnt = 0
+        print(f"Starting from tail {i}, and head {self.head}")
+        while cnt < self.count:
             entry = self.entries[i]
 
             if entry.rd_idx == rs_idx and entry.valid and entry.instr_pc != inst_addr:
                 return entry, i
 
             i = (i-1) % self.size
+            cnt += 1
         
         # Check the head
         entry = self.entries[self.head]

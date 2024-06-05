@@ -1,5 +1,7 @@
 from load_unit import LoadUnit, loadReservationStationEntry
 from store_unit import StoreUnit, storeReservationStationEntry
+from print import convertToHex
+from rob import ROBEntry
 
 class LoadStoreUnit(object):
     """Resembles the Load Store Unit of LEN5 processor."""
@@ -15,14 +17,23 @@ class LoadStoreUnit(object):
 
         # Memory
         self.mem = None
+
+        # Commit interface
+        self.commit_unit = None
     
     def connectMemory(self, mem):
         self.mem = mem
+    
+    def connectCommitUnit(self, commit_unit):
+        self.commit_unit = commit_unit
     
     def check(self):
         """Check if the Memory is connected"""
         if (self.mem is None):
             raise Exception("Memory not connected to LoadStoreUnit")
+        
+        if (self.commit_unit is None):
+            raise Exception("Commit Unit not connected to LoadStoreUnit")
 
     def step(self):
         """Steps to perform:
@@ -38,11 +49,13 @@ class LoadStoreUnit(object):
             txn = self.mem.getReadyTransaction()
             if (type(txn) == loadReservationStationEntry):
                 self.load_unit.updateResult(txn)
-        
+                print(f"Updated load txn: {txn} with ROBidx: {txn.getROBIdx()}")
         # Step 2
-        if (self.mem.canStartTransaction()):
+        elif (self.mem.canStartTransaction()):
             txn = self.getStartableTransactions()
             if (txn is not None):
+                print(f"Starting transaction")
+                print(f"Picked txn: {txn} with ROBIdx: {txn.getROBIdx()}")
                 self.mem.startTransaction(txn)
         
         # Step 3,4,5
@@ -51,7 +64,8 @@ class LoadStoreUnit(object):
         self.mem.step()
 
         # Step 6
-        self.storeToLoadForwarding()
+        # todo check and implement this
+        # self.storeToLoadForwarding()
 
         
 #-------------------------------------------------------------------------------
@@ -90,8 +104,8 @@ class LoadStoreUnit(object):
         """Check if there is a speculative load hazard."""
 
         for entry in self.store_unit.rs.entries:
-            if (entry["status"] != "clear"):
-                if (entry["entry"].address == txn.address):
+            if (entry["status"] not in ["clear", "done"]):
+                if (entry["entry"].address == txn.address or entry["entry"].address is None):
                     return True
         
         return False
@@ -102,19 +116,58 @@ class LoadStoreUnit(object):
 
         txn = None
 
-        # Check the Load Unit
-        if (self.load_unit.hasReadyAddress()):
-            txn = self.load_unit.getReadyMemoryTransaction()
-            # print("Load Unit has ready memory transaction")
-            # Check for speculative load hazard
-            if (self.speculativeLoadHazardCheck(txn)):
-                # print("Speculative Load Hazard Detected")
-                self.load_unit.restoreAddressReady(txn)
-                txn = None
+        # Check the head of the ROB if there is a load or store instruction
+        # if there is, allow the memory transaction
+        rob = self.commit_unit.rob
 
-        # if no load transaction can be issued, then check the store unit
-        if (txn is None and self.store_unit.hasReadyAddress()):
-            # print("Store Unit has ready memory transaction")
-            txn = self.store_unit.getReadyMemoryTransaction()
+        # Pick the oldest address_ready txn from the load unit
+        txn = LoadStoreUnit.pickOldest(self.load_unit.rs, rob_idx=rob.head)
 
-        return txn
+        txn = self.validateTransaction(txn)
+
+        if (txn is not None):
+            return txn
+
+        txn = LoadStoreUnit.pickOldest(self.store_unit.rs, rob_idx=rob.head)
+
+        txn = self.validateTransaction(txn)
+        
+        if (txn is not None):
+            return txn
+        
+        return None
+    
+        
+    def pickOldest(rs, rob_idx : int):
+        """Pick the next entry ready for execution from the RS.
+        Pick the oldest entry that is ready for execution.
+        """
+
+        for entry in rs.entries:
+            if (entry["status"] == "address_ready" and entry["entry"].getROBIdx() == rob_idx):
+                return entry
+        
+        return None
+
+    
+    def validateTransaction(self, txn):
+        """Validate the transaction before starting it."""
+        if (txn is not None):
+            match txn["status"]:
+                case "address_ready":
+                    # The txn is ready to be issued, set its status to executing
+                    if (type(txn["entry"]) == loadReservationStationEntry):
+                        txn["status"] = "executing"
+                    else:
+                        txn["status"] = "done"
+                    return txn["entry"]
+                case "waiting_operands":
+                    # The load is waiting for the operands to be ready
+                    # I think this will never happen, because if it is at ROB head
+                    # then all the other instructions have committed and it can't 
+                    # be updated anymore, so raise an exception here
+                    print(txn)
+                    print(self.load_unit.rs)
+                    raise Exception("TXN is waiting for operands, this should not happen")
+                case _:
+                    return None

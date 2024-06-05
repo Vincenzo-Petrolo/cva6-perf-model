@@ -30,7 +30,7 @@ class storeReservationStationEntry(ReservationStationEntry):
 
     def convertToEntry(instr : instr.Instruction):
         # Create the entry object
-        print(f"Converting {instr} to store entry with rob_idx {instr.rob_idx}")
+        # print(f"Converting {instr} to store entry with rob_idx {instr.rob_idx}")
         entry = storeReservationStationEntry()
         entry.setInstr(instr.mnemo)
         entry.setPC(instr.address)
@@ -94,9 +94,9 @@ class storeReservationStationEntry(ReservationStationEntry):
 
     def updateFromCDB(self, rob_idx, value):
         """Update the entry with the value from the CDB."""
-        if (rob_idx == self.rs1_idx):
+        if (self.rs1_value is None and rob_idx == self.rs1_idx):
             self.rs1_value = value
-        if (rob_idx == self.rs2_idx):
+        if (self.rs2_value is None and rob_idx == self.rs2_idx):
             self.rs2_value = value
 
 class StoreUnit(MemoryUnit):
@@ -115,7 +115,7 @@ class StoreUnit(MemoryUnit):
         """
         for e in self.rs.entries:
             if (e["entry"].getROBIdx() == resultFromMemUnit["rob_idx"] and e["status"] == "executing"):
-                print(f"Updating address for {e['entry']} with {resultFromMemUnit['res_value']}")
+                # print(f"Updating address for {e['entry']} with {resultFromMemUnit['res_value']}")
                 # Update the address
                 e["entry"].address = resultFromMemUnit["res_value"]
                 e["status"] = "address_ready"
@@ -151,13 +151,13 @@ class StoreUnit(MemoryUnit):
         """Store unit never writes on CDB"""
         entry = self.rs.getEntryDone()
 
-        print(f"{__class__.__name__} {entry}")
+        # print(f"{__class__.__name__} {entry}")
 
         if (entry is None):
             return None
 
         return {
-            "res_value" : 0,
+            "res_value" : entry["entry"].address,
             "rd_idx"    : entry["entry"].rd_idx,
             "rob_idx"   : entry["entry"].getROBIdx(),
             "valid"     : True

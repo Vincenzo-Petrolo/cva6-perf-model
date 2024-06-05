@@ -181,7 +181,7 @@ class Dispatcher(object):
         instr = self.iq.get()
 
         rob_idx = self.commit_unit.rob.push(instr)
-        print(rob_idx, instr)
+        # print(rob_idx, instr)
 
         if (instr.getBase() == 'AUIPC'):
             # Update the ROB entry with the immediate value

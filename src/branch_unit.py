@@ -115,11 +115,11 @@ class branchReservationStationEntry(ReservationStationEntry):
     def updateFromCDB(self, rob_idx, value):
         """Check if can update entry with the value from the CDB."""
         if (self.rs1_idx is not None):
-            if (self.rs1_idx == rob_idx):
+            if (self.rs1_value is None and self.rs1_idx == rob_idx):
                 self.rs1_value = value
 
         if (self.rs2_idx is not None):
-            if (self.rs2_idx == rob_idx):
+            if (self.rs2_value is None and self.rs2_idx == rob_idx):
                 self.rs2_value = value
 
         

@@ -58,9 +58,9 @@ class CommitUnit( object ):
         if not self.commit_queue.empty():
             entry = self.commit_queue.get()
             # Step 3 If the entry is valid, write to the RF
-            print(f"Committing Instruction: {entry.instruction} at {convertToHex(entry.instr_pc)} with value {entry.res_value}")
+            # print(f"Committing Instruction: {entry.instruction} at {convertToHex(entry.instr_pc)} with value {entry.res_value}")
+            self.commit_history.append(entry)
             if entry.valid:
-                self.commit_history.append(entry)
                 self.rf.write(entry.rd_idx, entry.res_value)
         
         if (full):
@@ -144,6 +144,6 @@ class CommitUnit( object ):
         """Return the commit history as a string"""
         string = ""
         for entry in self.commit_history:
-            string += f"{convertToHex(entry.instr_pc)}: {entry.instruction} -> {convertToHex(entry.res_value)}\n"
+            string += f"{convertToHex(entry.instr_pc)}: {entry.instruction} -> {entry.res_value}\n"
 
         return string

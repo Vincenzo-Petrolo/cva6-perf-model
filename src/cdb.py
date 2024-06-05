@@ -64,6 +64,7 @@ class CommonDataBus(object):
                 # Step 4
                 result = eu.getResult()
                 print(f"CDB Step, getting {result} from {eu}")
+                # assert (result["res_value"] is not None)
                 self.buffer_o.put(result)
                 # Step 5
                 for eu in self.EUS:

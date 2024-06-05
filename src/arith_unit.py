@@ -104,6 +104,9 @@ class arithReservationStationEntry(ReservationStationEntry):
             # No in-flight instruction is computing the value, so get it from RF
             # print(f"Fetching rs1 value {rf[self.rs1_idx]} from RF {self}")
             self.rs1_value = rf[self.rs1_idx]
+        
+        # if (self.pc == 0x800000ac):
+            # print(f"forward1: {self.rs1_value}")
 
 
         if (arithReservationStationEntry.Rtype(self.op)):
@@ -125,15 +128,26 @@ class arithReservationStationEntry(ReservationStationEntry):
                 # No in-flight instruction is computing the value, so get it from RF
                 # print(f"Fetching rs2 value {rf[self.rs2_idx]} from RF {self}")
                 self.rs2_value = rf[self.rs2_idx]
+
+            # if (self.pc == 0x800000ac):
+            #     print(f"forward2: {self.rs2_value}")
+        
+        if (self.pc == 0x800000b8):
+            print("Forwarding add", self)
+            print(commit_unit.rob)
     
     def updateFromCDB(self, rob_idx, value):
         """Check if can update entry with the value from the CDB."""
-        if (self.rs1_idx == rob_idx):
+        if (self.rs1_value is None and self.rs1_idx == rob_idx):
             self.rs1_value = value
 
         if (arithReservationStationEntry.Rtype(self.op)):
-            if (self.rs2_idx == rob_idx):
+            if (self.rs2_value is None and self.rs2_idx == rob_idx):
                 self.rs2_value = value
+
+        if (self.pc == 0x800000b8):
+            print("Updating add", self)
+        
 
 
         
@@ -153,7 +167,6 @@ class ArithUnit(ExecUnit):
             case 0b0110011:
                 if (entry.func3 == 0b000 and entry.func7 == 0b0000000):
                     # ADD
-                    print(f"ADD {entry.rs1_value} + {entry.rs2_value}")
                     return entry.rs1_value + entry.rs2_value
                 elif (entry.func3 == 0b000 and entry.func7 == 0b0100000):
                     # SUB

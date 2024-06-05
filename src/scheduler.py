@@ -53,6 +53,7 @@ class Scheduler(object):
 
         # Connect the LSU to the memory
         self.load_store_unit.connectMemory(self.dmem)
+        self.load_store_unit.connectCommitUnit(self.commit_unit)
 
         # make the arithmetic unit visible for the CDB
         self.cdb.register(self.arith_unit)
@@ -74,10 +75,10 @@ class Scheduler(object):
         self.load_store_unit.step()
         self.dispatcher.step()
 
-        print(self.arith_unit.rs)
-        print(self.load_store_unit.load_unit.rs)
-        print(self.load_store_unit.store_unit.rs)
-        print(self.commit_unit.rob)
+        # print(self.arith_unit.rs)
+        # print(self.load_store_unit.load_unit.rs)
+        # print(self.load_store_unit.store_unit.rs)
+        # print(self.commit_unit.rob)
 
         if (self.check()):
 

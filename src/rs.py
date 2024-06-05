@@ -195,9 +195,13 @@ class ReservationStation(ABC):
     def updateResult(self, rob_idx, res_value):
         """Update the result of the instruction in the Reservation Station
         this is obtained after the execution of the entry."""
+        found = False
         for i, e in enumerate(self.entries):
             if e["entry"].rob_idx == rob_idx and e["status"] == "executing":
                 e["entry"].setResult(res_value)
                 e["status"] = "done"
+                found = True
 
                 # self.clearEntry(i)
+        
+        assert found, f"Entry with ROB idx: {rob_idx} and status : executing not found in Reservation Station."
