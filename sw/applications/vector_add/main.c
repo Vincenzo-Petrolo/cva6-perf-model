@@ -1,15 +1,17 @@
 /*Spike ISS stuff*/
-unsigned long long tohost = 0;
-unsigned long long fromhost = 0;
+volatile unsigned long long tohost = 0;
+volatile unsigned long long fromhost = 0;
 
 #define N 10
 
-void _start(void) {
+void __attribute__((optimize("O0"))) _start(void) {
 
     /*must set the stack pointer*/
     asm volatile("la sp, _sp");
 
     main();
+
+    asm volatile ("sw %0, 0(%1)" : : "r" (1), "r" (&tohost));
 
 }
 
@@ -25,8 +27,6 @@ int main(void) {
     {
         C[i] = A[i] + B[i];
     }
-
-    tohost = 1;
 
     return 0;
 

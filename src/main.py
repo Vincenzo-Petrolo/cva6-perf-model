@@ -26,7 +26,12 @@ def main():
         try:
             scheduler.step(i)
         except Exception as e:
-            if (str(e) != "Simulation is over"):
+            if (str(e) == "Simulation is over"):
+                print("Simulation is over")
+                print(f"Total Cycles: {i}")
+                print(f"Total Instructions: {len(scheduler.commit_unit.commit_history)}")
+                print(f"IPC: {len(scheduler.commit_unit.commit_history) / i : .2f}")
+            else:
                 print(f"Exception: {e}")
             break
 

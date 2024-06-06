@@ -24,7 +24,7 @@ RISCV_EXE_PREFIX           	?= riscv32-unknown-elf
 GCC_VERSION					:= $(shell $(RISCV_EXE_PREFIX)-gcc -dumpversion)
 ISA_STRING				?= rv32i
 ABI_STRING					?= ilp32
-COPT						?= -O0
+COPT						?= -O2
 CDEFS						?= # SPIKE_CHECK if using Spike
 CFLAGS			:= -march=$(ISA_STRING) \
 				   -mabi=$(ABI_STRING) \
