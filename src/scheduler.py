@@ -40,7 +40,7 @@ class Scheduler(object):
 
         self.cdb = CommonDataBus()
 
-        self.commit_unit = CommitUnit()
+        self.commit_unit = CommitUnit(rob_size=16)
 
         self.rf = RF()
 
