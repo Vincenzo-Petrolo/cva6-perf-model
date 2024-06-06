@@ -8,6 +8,9 @@ from lsu            import LoadStoreUnit
 from dmem           import DataMemory
 from branch_unit    import BranchUnit
 
+COMMIT_HISTORY_DUMP = "commit.log"
+ROB_DUMP = "rob.log"
+MEM_DUMP = "memory.log"
 
 
 class Scheduler(object):
@@ -16,7 +19,12 @@ class Scheduler(object):
     - dispatcher is empty,
     - the rob is empty.
     """
-    def __init__(self, test_name : str, mem_name : str) -> None:
+    def __init__(self, test_name    : str,
+                 mem_name           : str,
+                 mem_dump           :  bool = False,
+                 commit_history_dump: bool = False,
+                 rob_dump           : bool = False
+                 ) -> None:
         """Instantiate all the objects"""
         self.iq = InstrQueue(test_name)
 
@@ -36,7 +44,15 @@ class Scheduler(object):
 
         self.rf = RF()
 
+        self.mem_dump = mem_dump
+
+        self.commit_history_dump = commit_history_dump
+
+        self.rob_dump = rob_dump
+
         self.connect()
+
+        self._cleanDumps()
 
     def connect(self) -> None:
         """Connect the objects"""
@@ -67,7 +83,7 @@ class Scheduler(object):
         self.commit_unit.connectDispatcher(self.dispatcher)
         self.commit_unit.connectRF(self.rf)
     
-    def step(self):
+    def step(self, cycle : int):
         """Run one step of the simulation loop"""
         self.commit_unit.step()
         self.arith_unit.step()
@@ -75,23 +91,45 @@ class Scheduler(object):
         self.load_store_unit.step()
         self.dispatcher.step()
 
-        # print(self.arith_unit.rs)
-        # print(self.load_store_unit.load_unit.rs)
-        # print(self.load_store_unit.store_unit.rs)
-        print(self.commit_unit.rob)
+        # Dump the data structures
+        self.dump(cycle)
 
         if (self.check()):
+            if (self.commit_history_dump):
+                self.dumpDataStructure(self.commit_unit.commitHistory(), COMMIT_HISTORY_DUMP, None)
 
-            print("Dumping memory")
-            print(self.dmem)
-
-            print("Commit history")
-            print(self.commit_unit.commitHistory())
             raise Exception("Simulation is over")
 
     def check(self):
         """Check if the simulation is over"""
+
         return self.iq.empty() and self.dispatcher.empty() and self.commit_unit.empty()
+    
+    
+    def dump(self, cycle : int):
+        """Take care of dumping stuff"""
+        
+        if (self.rob_dump):
+            self.dumpDataStructure(self.commit_unit.rob, ROB_DUMP, cycle)
+        
+        if (self.mem_dump):
+            self.dumpDataStructure(self.dmem, MEM_DUMP, cycle)
 
 
+    def _cleanDumps(self):
+        """Clean the dump files"""
+        with open(COMMIT_HISTORY_DUMP, "w") as f:
+            pass
 
+        with open(ROB_DUMP, "w") as f:
+            pass
+
+        with open(MEM_DUMP, "w") as f:
+            pass
+
+    def dumpDataStructure(self, data_structure, filename, cycle):
+        """Dump a data structure, said data structure musti implement the __str__ method"""
+
+        with open(filename, "a") as f:
+            f.write("Cycle: " + str(cycle) + "\n") if cycle is not None else None
+            f.write(str(data_structure))

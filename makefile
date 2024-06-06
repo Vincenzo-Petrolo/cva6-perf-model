@@ -91,6 +91,12 @@ $(BUILD_DIR)/spike-trace.log: $(BUILD_DIR)/main.elf
 .PHONY: vendor-opcodes
 vendor-opcodes:
 	python3 util/vendor.py sw/vendor/riscv-opcodes.vendor.hjson
+
+.PHONY: run
+run: app spike-trace $(BUILD_DIR)/applications/$(PROJECT)/main.mem
+	@printf "\033[1;33m## Running the simulation...\033[0m\n"
+	@python3 src/main.py --test_name $(BUILD_DIR)/applications/$(PROJECT)/spike-trace.log --mem_name $(BUILD_DIR)/main.mem --mem_dump --rob_dump --commit_history_dump
+	@printf "\033[1;32m## Simulation completed!\033[0m\n"
 	
 
 
